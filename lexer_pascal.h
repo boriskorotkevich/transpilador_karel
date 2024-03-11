@@ -7,9 +7,7 @@
 #include <map>
 
 struct lexer_pascal : lexer_base{ 
-   private:
-
-   std::map<std::string, tipo_token> palabras = {
+   const std::map<std::string, tipo_token> palabras = {
       {"iniciar-programa", INI_PROG},
       {"inicia-ejecucion", INI_EJE},
       {"termina-ejecucion", FIN_EJE},
@@ -56,7 +54,7 @@ struct lexer_pascal : lexer_base{
       {"si", SI},
    };
 
-   std::map<std::string, tipo_token> operadores = {
+   const std::map<std::string, tipo_token> operadores = {
       {"no", NOT},
       {"o", OR},
       {"u", OR},
@@ -66,16 +64,6 @@ struct lexer_pascal : lexer_base{
       {")", PAR_DER},
       {";", PUNTO_COMA}
    };
-
-   public:
-
-   std::map<std::string, tipo_token> get_palabras(){
-      return palabras;
-   }
-
-   std::map<std::string, tipo_token> get_operadores(){
-      return operadores;
-   }
 
    bool es_comentario_linea(char*& p){
       if(*p == '{'){
