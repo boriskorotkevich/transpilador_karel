@@ -3,13 +3,14 @@
 
 #include "lexer_aux.h"
 #include "error.h"
+#include <cctype>
 #include <string>
 #include <map>
 
 struct lexer_pascal : lexer_base{ 
-   const std::map<std::string, tipo_token> palabras = {
-      {"iniciar-programa", INI_PROG},
-      {"inicia-ejecucion", INI_EJE},
+   std::map<std::string, tipo_token> palabras = {
+      {"iniciar-programa", INICIO_PROG},
+      {"inicia-ejecucion", INICIO_EJE},
       {"termina-ejecucion", FIN_EJE},
       {"finalizar-programa", FIN_PROG},
       {"define-nueva-instruccion", DEFN_INS},
@@ -26,83 +27,91 @@ struct lexer_pascal : lexer_base{
       {"hacer", HACER},
       {"repetir", REPETIR},
       {"veces", VECES},
-      {"inicio", INI},
+      {"inicio", INICIO},
       {"fin", FIN},
       {"precede", PRECEDE},
       {"sucede", SUCEDE},
-      {"si-es-cero", IF_CERO},
+      {"si-es-cero", ES_CERO},
       {"frente-libre", FRENTE_LIB},
       {"frente-bloqueado", FRENTE_BLOQ},
-      {"izquierda-libre", IZQ_LIB},
-      {"izquierda-bloqueda", IZQ_BLOQ},
-      {"derecha-libre", DER_LIB},
-      {"derecha-bloqueada", DER_BLOQ},
+      {"izquierda-libre", IZQUIERDA_LIB},
+      {"izquierda-bloqueda", IZQUIERDA_BLOQ},
+      {"derecha-libre", DERECHA_LIB},
+      {"derecha-bloqueada", DERECHA_BLOQ},
       {"junto-a-zumbador", JUNTO_ZUM},
       {"no-junto-a-zumbador", NJUNTO_ZUM},
       {"algun-zumbador-en-la-mochila", ALGUN_ZUM_BAG},
       {"ningun-zumbador-en-la-mochila", NINGUN_ZUM_BAG},
-      {"orientado-al-norte", IF_N},
-      {"orientado-al-sur", IF_S},
-      {"orientado-al-este", IF_E},
-      {"orientado-al-oeste", IF_O},
-      {"no-orientado-al-norte", NIF_N},
-      {"no-orientado-al-sur", NIF_S},
-      {"no-orientado-al-este", NIF_E},
-      {"no-orientado-al-oeste", NIF_O},
+      {"orientado-al-norte", ORIENTADO_NORTE},
+      {"orientado-al-sur", ORIENTADO_SUR},
+      {"orientado-al-este", ORIENTADO_ESTE},
+      {"orientado-al-oeste", ORIENTADO_OESTE},
+      {"no-orientado-al-norte", NORIENTADO_NORTE},
+      {"no-orientado-al-sur", NORIENTADO_SUR},
+      {"no-orientado-al-este", NORIENTADO_ESTE},
+      {"no-orientado-al-oeste", NORIENTADO_OESTE},
       {"sino", SINO},
       {"si-no", SINO},
       {"si", SI},
    };
 
-   const std::map<std::string, tipo_token> operadores = {
+   std::map<std::string, tipo_token> operadores = {
       {"no", NOT},
       {"o", OR},
       {"u", OR},
       {"y", AND},
       {"e", AND},
-      {"(", PAR_IZQ},
-      {")", PAR_DER},
+      {"(", PARENTESIS_IZQ},
+      {")", PARENTESIS_DER},
       {";", PUNTO_COMA}
    };
 
+   std::map<std::string, tipo_token>& get_palabras(){
+      return palabras;
+   }
+
+   std::map<std::string, tipo_token>& get_operadores(){
+      return operadores;
+   }
+
    bool es_comentario_linea(char*& p){
-      if(*p == '{'){
-         p += 1;
-         while(*p != '}'){
-            if(*p == '\0'){
-               throw error("se esperaba }", p);
-            }
-            ++p;
-         }
-         p += 1;
-         return true;
-      }
       return false;
    }
-   
-   bool es_comentario_bloque(char*& p){
-      if(*p == '(' && *(p + 1) == '*'){
-         p += 2;
-         while(*p != '*' || *(p + 1) != ')'){
+
+   bool tipo_comentario_bloque(char*& p, const std::vector<std::string>& del){
+      int tam = del[0].size();
+      if(std::string(p, p + tam) == del[0]){
+         p += tam;
+         while(std::string(p, p + tam) != del[1]){
             if(*p == '\0'){
-               throw error("se esperaba *)", p);
+               throw error("se esperaba " + del[1], p);
             }
             ++p;
          }
-         p += 2;
+         p += tam;
          return true;
       }
       return false;
    }
 
+   bool es_comentario_bloque(char*& p){
+      return tipo_comentario_bloque(p, {"(*", "*)"}) | tipo_comentario_bloque(p, {"{", "}"});
+   }
+
    bool es_operador(char*& p){
-      if(operadores.contains(std::string(p, p + 1))){
+      if(islower(*p)){
+         if(operadores.contains(std::string(p, p + 1)) && !isalnum(*(p + 1))){
+            p += 1;
+            return true;
+         }else if(operadores.contains(std::string(p, p + 2)) && !isalnum(*(p + 2))){
+            p += 2;
+            return true;
+         }
+      }else if(operadores.contains(std::string(p, p + 1))){
          p += 1;
          return true;
-      }else if(operadores.contains(std::string(p, p + 2))){
-         p += 2;
-         return true;
       }
+
       return false;
    }
 

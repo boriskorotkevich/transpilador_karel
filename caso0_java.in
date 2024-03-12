@@ -1,0 +1,22 @@
+class program {
+    program () {
+        move();
+       pickbeeper();
+       
+       leftIsBloqued();
+       
+       facingNorth();
+       facingSouth();
+       
+       turnleft(); 
+       
+       notFacingWest();
+       notFacingNorth();
+
+      putbeeper(); 
+      
+      frontIsClear();
+      
+      turnoff();
+    }
+}

@@ -10,55 +10,74 @@
 
 #include "error.h"
 
-enum tipo_token{
-   INI_PROG,
-   INI_EJE,
-   FIN_EJE,
+enum tipo_token{ 
+   /* Exclusivas de Java */
+
+   CLASS,
+   PROGRAM,
+   RETURN,
+   DEFINE,
+   VOID,
+   WHILE,
+   ITERATE,
+   LLAVE_IZQ,
+   LLAVE_DER,
+   IF,
+   ELSE,
+
+   /* Exclusivas de Pascal */
+
+   INICIO_PROG,
+   INICIO_EJE,
    FIN_PROG,
-   DEFN_INS,
-   DEFP_INS,
+   FIN_EJE,
    SAL_INS,
    COMO,
+   INICIO,
+   FIN,
+   HACER,
+   REPETIR,
+   VECES,
+   ENTONCES,
+   MIENTRAS,
+   DEFN_INS,
+   DEFP_INS,
+   SINO,
+   SI,
+
+   /* Comunes */
+
    APAGATE,
    GIRA_IZQ,
    AVANZA,
    COGE_ZUM,
    DEJA_ZUM,
-   INI,
-   FIN,
-   ENTONCES,
-   MIENTRAS,
-   HACER,
-   REPETIR,
-   VECES,
    PRECEDE,
    SUCEDE,
-   IF_CERO,
+   ES_CERO,
    FRENTE_LIB,
    FRENTE_BLOQ,
-   IZQ_LIB,
-   IZQ_BLOQ,
-   DER_LIB,
-   DER_BLOQ,
+   IZQUIERDA_LIB,
+   IZQUIERDA_BLOQ,
+   DERECHA_LIB,
+   DERECHA_BLOQ,
    JUNTO_ZUM,
    NJUNTO_ZUM,
    ALGUN_ZUM_BAG,
    NINGUN_ZUM_BAG,
-   IF_N,
-   IF_S,
-   IF_E,
-   IF_O,
-   NIF_N,
-   NIF_S,
-   NIF_E,
-   NIF_O,
-   SINO,
-   SI,
+   ORIENTADO_NORTE,
+   ORIENTADO_SUR,
+   ORIENTADO_ESTE,
+   ORIENTADO_OESTE,
+   NORIENTADO_NORTE,
+   NORIENTADO_SUR,
+   NORIENTADO_ESTE,
+   NORIENTADO_OESTE,
    NOT,
    OR,
    AND,
-   PAR_DER,
-   PAR_IZQ,
+   PARENTESIS_DER,
+   PARENTESIS_IZQ,
    PUNTO_COMA,
    LITERAL_ENTERA,
    IDENTIFICADOR,
@@ -66,39 +85,37 @@ enum tipo_token{
 };
 
 struct lexer_base{
-   private:
-      std::map<std::string, tipo_token> palabras, operadores;
-      
-   public:
-      lexer_base() = default;
-      virtual std::map<std::string, tipo_token> get_palabras() = 0;
-      virtual std::map<std::string, tipo_token> get_operadores() = 0;
-      virtual bool es_comentario_linea(char*&) = 0;
-      virtual bool es_comentario_bloque(char*&) = 0;
-      virtual bool es_operador(char*&) = 0;
-      virtual void salta_espacios(char*&) = 0;
+   std::map<std::string, tipo_token> palabras, operadores;
 
-      bool es_literal_entera(char*& p) const{
-         if(isdigit(*p)){
-            do{
-               ++p;
-            }while(isdigit(*p));
-            return true;
-         }
-         return false;
+   lexer_base() = default;
+   virtual std::map<std::string, tipo_token>& get_operadores() = 0;
+   virtual std::map<std::string, tipo_token>& get_palabras() = 0;
+   virtual bool es_comentario_linea(char*&) = 0;
+   virtual bool es_comentario_bloque(char*&) = 0;
+   virtual bool es_operador(char*&) = 0;
+   virtual void salta_espacios(char*&) = 0;
+
+   bool es_literal_entera(char*& p) const{
+      if(isdigit(*p)){
+         do{
+            ++p;
+         }while(isdigit(*p));
+         return true;
       }
+      return false;
+   }
 
-      bool es_identificador(char*& p) const{
-         if(isalpha(*p) || *p == '_'){
-            do{
-               ++p;
-            }while(isalnum(*p) || *p == '_' || *p == '-');
-            return true;
-         }
-         return false;
+   bool es_identificador(char*& p) const{
+      if(isalpha(*p) || *p == '_'){
+         do{
+            ++p;
+         }while(isalnum(*p) || *p == '_' || *p == '-');
+         return true;
       }
+      return false;
+   }
 
-      virtual ~lexer_base(){ }
+   virtual ~lexer_base(){ }
 };
 
 struct token_registrado{
@@ -136,10 +153,10 @@ std::vector<token_registrado> lexer(lexer_base* lb, std::string& s){
          continue;
       }else if(lb->es_literal_entera(ini)){
          ans.emplace_back(LITERAL_ENTERA, temp, ini);
-      }else if(lb->es_identificador(ini)){
-         ans.emplace_back(token_palabra(lb->get_palabras(), std::string(temp, ini)), temp, ini);
       }else if(lb->es_operador(ini)){
          ans.emplace_back(token_operador(lb->get_operadores(), std::string(temp, ini)), temp, ini);
+      }else if(lb->es_identificador(ini)){
+         ans.emplace_back(token_palabra(lb->get_palabras(), std::string(temp, ini)), temp, ini);
       }else if(ini == fin){
          ans.emplace_back(FIN_ARCHIVO, temp, ini + 1);
          break;
