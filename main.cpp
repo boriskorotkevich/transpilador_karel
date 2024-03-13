@@ -8,6 +8,7 @@
 
 #include "lexer_pascal.h"
 #include "lexer_java.h"
+#include "lexer_ruby.h"
 #include "debug.h"
 #include "error.h"
 
@@ -35,14 +36,15 @@ int main(int argc, char* argv[]){
       entrada = std::move(ss).str();
 
       std::vector<token_registrado> tokens;
-      if(*itr_vorigen == "pascal"){ // lexer_pascal
+      if(*itr_vorigen == "pascal"){    // lexer_pascal
          lexer_pascal pascal;
          tokens = lexer(&pascal, entrada);
       }else if(*itr_vorigen == "java"){ // lexer_java
          lexer_java java;
          tokens = lexer(&java, entrada);
-      }else{ // lexer_ruby
-         // ...
+      }else{                           // lexer_ruby
+         lexer_ruby ruby;
+         tokens = lexer(&ruby, entrada);
       }
 
 #ifdef DEBUG

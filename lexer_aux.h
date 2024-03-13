@@ -11,6 +11,11 @@
 #include "error.h"
 
 enum tipo_token{ 
+   /* Exclusivas de Ruby */
+
+   DEF,
+   SALTO_LINEA,
+
    /* Exclusivas de Java */
 
    CLASS,
@@ -31,21 +36,28 @@ enum tipo_token{
    INICIO_EJE,
    FIN_PROG,
    FIN_EJE,
-   SAL_INS,
    COMO,
    INICIO,
-   FIN,
    HACER,
    REPETIR,
-   VECES,
    ENTONCES,
-   MIENTRAS,
    DEFN_INS,
    DEFP_INS,
+
+   /* Comunes entre Ruby y Pascal */
+
+   MIENTRAS,
+   SAL_INS,
+   VECES,
+   FIN,
    SINO,
    SI,
 
-   /* Comunes */
+   /* Comunes entre Java y Pascal */
+
+   PUNTO_COMA,
+
+   /* Comunes entre todos */
 
    APAGATE,
    GIRA_IZQ,
@@ -78,7 +90,6 @@ enum tipo_token{
    AND,
    PARENTESIS_DER,
    PARENTESIS_IZQ,
-   PUNTO_COMA,
    LITERAL_ENTERA,
    IDENTIFICADOR,
    FIN_ARCHIVO

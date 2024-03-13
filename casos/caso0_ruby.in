@@ -1,0 +1,14 @@
+#TODO poner codigo aqui
+avanza
+gira-izquierda
+gira-izquierda
+gira-izquierda
+si (frente-libre) y (orientado-al-este) y no (algun-zumbador-en-la-mochila)
+   avanza
+   gira-izquierda
+sino 
+   deja-zumbador
+   mientras frente-libre # Comentario de linea
+      avanza
+   fin
+fin
