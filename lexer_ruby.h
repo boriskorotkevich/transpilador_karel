@@ -1,14 +1,17 @@
 #ifndef LEXER_RUBY_H
 #define LEXER_RUBY_H
 
-#include "lexer_aux.h"
 #include "error.h"
+#include "lexer_aux.h"
 #include <cctype>
 #include <string>
-#include <map>
+#include <vector>
 
-struct lexer_ruby : lexer_base{ 
-   std::map<std::string, tipo_token> palabras = {
+struct lexer_ruby : lexer_base{
+   lexer_ruby( )
+   : lexer_base(
+   /* palabras */
+   {
       {"def", DEF},
       {"apagate", APAGATE},
       {"sal-de-instruccion", SAL_INS},
@@ -42,27 +45,21 @@ struct lexer_ruby : lexer_base{
       {"no-orientado-al-oeste", NORIENTADO_OESTE},
       {"sino", SINO},
       {"si", SI},
-   };
-
-   std::map<std::string, tipo_token> operadores = {
       {"no", NOT},
       {"o", OR},
       {"u", OR},
-      {"y", AND},
+      {"y", AND}
+   },
+   /* símbolos */
+   {
       {"(", PARENTESIS_IZQ},
       {")", PARENTESIS_DER},
       {"\n", SALTO_LINEA}
-   };
-
-   std::map<std::string, tipo_token>& get_palabras(){
-      return palabras;
+   }) {
+      return;
    }
 
-   std::map<std::string, tipo_token>& get_operadores(){
-      return operadores;
-   }
-
-   bool es_comentario_linea(char*& p){
+   bool es_comentario_linea(const char*& p) const{
       if(*p == '#'){
          p += 1;
          while(*p != '\n'){
@@ -73,34 +70,15 @@ struct lexer_ruby : lexer_base{
       return false;
    }
 
-   bool es_comentario_bloque(char*& p){
+   bool es_comentario_bloque(const char*& p) const{
       return false;
    }
 
-   bool es_operador(char*& p){
-      if(islower(*p)){
-         if(operadores.contains(std::string(p, p + 1)) && !isalnum(*(p + 1))){
-            p += 1;
-            return true;
-         }else if(operadores.contains(std::string(p, p + 2)) && !isalnum(*(p + 2))){
-            p += 2;
-            return true;
-         }
-      }else if(operadores.contains(std::string(p, p + 1))){
-         p += 1;
-         return true;
-      }
-
-      return false;
-   }
-
-   void salta_espacios(char*& p){
-      while(*p == ' ' || *p == '\t' || *p == '\v' || *p == '\f' || *p == '\r'){
+   void salta_espacios(const char*& p) const{
+      while(std::isspace(*p) && *p != '\n'){
          ++p;
       }
    }
-
-   ~lexer_ruby(){ }
 };
 
 #endif

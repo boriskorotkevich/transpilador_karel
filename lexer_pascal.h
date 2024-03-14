@@ -1,14 +1,17 @@
 #ifndef LEXER_PASCAL_H
 #define LEXER_PASCAL_H
 
-#include "lexer_aux.h"
 #include "error.h"
+#include "lexer_aux.h"
 #include <cctype>
 #include <string>
-#include <map>
+#include <vector>
 
-struct lexer_pascal : lexer_base{ 
-   std::map<std::string, tipo_token> palabras = {
+struct lexer_pascal : lexer_base{
+   lexer_pascal( )
+   : lexer_base(
+   /* palabras */
+   {
       {"iniciar-programa", INICIO_PROG},
       {"inicia-ejecucion", INICIO_EJE},
       {"termina-ejecucion", FIN_EJE},
@@ -53,75 +56,50 @@ struct lexer_pascal : lexer_base{
       {"sino", SINO},
       {"si-no", SINO},
       {"si", SI},
-   };
-
-   std::map<std::string, tipo_token> operadores = {
       {"no", NOT},
       {"o", OR},
       {"u", OR},
       {"y", AND},
-      {"e", AND},
+      {"e", AND}
+   },
+   /* símbolos */
+   {
       {"(", PARENTESIS_IZQ},
       {")", PARENTESIS_DER},
       {";", PUNTO_COMA}
-   };
-
-   std::map<std::string, tipo_token>& get_palabras(){
-      return palabras;
+   }) {
+      return;
    }
 
-   std::map<std::string, tipo_token>& get_operadores(){
-      return operadores;
-   }
-
-   bool es_comentario_linea(char*& p){
+   bool es_comentario_linea(const char*& p) const{
       return false;
    }
 
-   bool tipo_comentario_bloque(char*& p, const std::vector<std::string>& del){
-      int tam = del[0].size();
-      if(std::string(p, p + tam) == del[0]){
-         p += tam;
-         while(std::string(p, p + tam) != del[1]){
-            if(*p == '\0'){
-               throw error("se esperaba " + del[1], p);
+   bool es_comentario_bloque(const char*& p) const{
+      auto tipo_comentario_bloque = [&](const std::vector<std::string>& del){
+         int tam = del[0].size();
+         if(std::string(p, p + tam) == del[0]){
+            p += tam;
+            while(std::string(p, p + tam) != del[1]){
+               if(*p == '\0'){
+                  throw error("se esperaba " + del[1], p);
+               }
+               ++p;
             }
-            ++p;
-         }
-         p += tam;
-         return true;
-      }
-      return false;
-   }
-
-   bool es_comentario_bloque(char*& p){
-      return tipo_comentario_bloque(p, {"(*", "*)"}) | tipo_comentario_bloque(p, {"{", "}"});
-   }
-
-   bool es_operador(char*& p){
-      if(islower(*p)){
-         if(operadores.contains(std::string(p, p + 1)) && !isalnum(*(p + 1))){
-            p += 1;
-            return true;
-         }else if(operadores.contains(std::string(p, p + 2)) && !isalnum(*(p + 2))){
-            p += 2;
+            p += tam;
             return true;
          }
-      }else if(operadores.contains(std::string(p, p + 1))){
-         p += 1;
-         return true;
-      }
+         return false;
+      };
 
-      return false;
+      return tipo_comentario_bloque({ "(*", "*)" }) || tipo_comentario_bloque({ "{", "}" });
    }
 
-   void salta_espacios(char*& p){
-      while(isspace(*p)){
+   void salta_espacios(const char*& p) const{
+      while(std::isspace(*p)){
          ++p;
       }
    }
-
-   ~lexer_pascal(){ }
 };
 
 #endif

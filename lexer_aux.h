@@ -1,67 +1,81 @@
 #ifndef LEXER_AUX_H
 #define LEXER_AUX_H
 
-#include <string_view>
-#include <functional>
+#include <algorithm>
+#include <cctype>
+#include <algorithm>
 #include <iostream>
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "error.h"
 
-enum tipo_token{ 
-   /* Exclusivas de Ruby */
+enum tipo_token{
+   // tokens relacionados con el inicio y fin del programa
 
-   DEF,
-   SALTO_LINEA,
+   CLASS,            // java
+   INICIO_PROG,      // pascal
+   FIN_PROG,         // pascal
 
-   /* Exclusivas de Java */
+   // tokens relacionados con main
 
-   CLASS,
-   PROGRAM,
-   RETURN,
-   DEFINE,
-   VOID,
-   WHILE,
-   ITERATE,
-   LLAVE_IZQ,
-   LLAVE_DER,
-   IF,
-   ELSE,
+   PROGRAM,          // java
+   INICIO_EJE,       // pascal
+   FIN_EJE,          // pascal
 
-   /* Exclusivas de Pascal */
+   // tokens relacionados con la definición de funciones
 
-   INICIO_PROG,
-   INICIO_EJE,
-   FIN_PROG,
-   FIN_EJE,
-   COMO,
-   INICIO,
-   HACER,
-   REPETIR,
-   ENTONCES,
-   DEFN_INS,
-   DEFP_INS,
+   VOID,             // java
+   DEFINE,           // java
+   DEFN_INS,         // pascal
+   DEFP_INS,         // pascal
+   COMO,             // pascal
+   DEF,              // ruby
 
-   /* Comunes entre Ruby y Pascal */
+   // tokens relacionados con terminar una función
 
-   MIENTRAS,
-   SAL_INS,
-   VECES,
-   FIN,
-   SINO,
-   SI,
+   RETURN,           // java
+   SAL_INS,          // pascal y ruby
 
-   /* Comunes entre Java y Pascal */
+   // tokens relacionados con delimitadores de instrucción
 
-   PUNTO_COMA,
+   PUNTO_COMA,       // java
+   SALTO_LINEA,      // ruby
 
-   /* Comunes entre todos */
+   // tokens relacionados con delimitadores de bloque
+
+   LLAVE_IZQ,        // java
+   LLAVE_DER,        // java
+   INICIO,           // pascal
+   FIN,              // pascal y ruby
+
+   // tokens relacionados con if y else
+
+   IF,               // java
+   ELSE,             // java
+   SI,               // pascal y ruby
+   SINO,             // pascal y ruby
+   ENTONCES,         // pascal
+
+   // tokens relacionados con while
+
+   WHILE,            // java
+   MIENTRAS,         // pascal y ruby
+   HACER,            // pascal
+
+   // tokens relacionados con iterate
+
+   ITERATE,          // java
+   REPETIR,          // pascal y ruby
+   VECES,            // pascal y ruby
+
+   // tokens relacionados con expresiones, comandos y fin de archivo (comunes para todos)
 
    APAGATE,
-   GIRA_IZQ,
    AVANZA,
+   GIRA_IZQ,
    COGE_ZUM,
    DEJA_ZUM,
    PRECEDE,
@@ -88,45 +102,72 @@ enum tipo_token{
    NOT,
    OR,
    AND,
-   PARENTESIS_DER,
-   PARENTESIS_IZQ,
-   LITERAL_ENTERA,
    IDENTIFICADOR,
+   LITERAL_ENTERA,
+   PARENTESIS_IZQ,
+   PARENTESIS_DER,
    FIN_ARCHIVO
 };
 
-struct lexer_base{
-   std::map<std::string, tipo_token> palabras, operadores;
+class lexer_base {
+   std::map<std::string, tipo_token> palabras, simbolos;
+   int max_tam_simbolo;
 
-   lexer_base() = default;
-   virtual std::map<std::string, tipo_token>& get_operadores() = 0;
-   virtual std::map<std::string, tipo_token>& get_palabras() = 0;
-   virtual bool es_comentario_linea(char*&) = 0;
-   virtual bool es_comentario_bloque(char*&) = 0;
-   virtual bool es_operador(char*&) = 0;
-   virtual void salta_espacios(char*&) = 0;
+public:
+   lexer_base(std::map<std::string, tipo_token>&& p, std::map<std::string, tipo_token>&& s)
+   : palabras(std::move(p)), simbolos(std::move(s)), max_tam_simbolo(0) {
+      for (const auto& [cad, token] : simbolos) {
+         max_tam_simbolo = std::max(max_tam_simbolo, int(cad.size( )));
+      }
+   }
 
-   bool es_literal_entera(char*& p) const{
+   virtual ~lexer_base( ) = default;
+   virtual bool es_comentario_linea(const char*&) const = 0;
+   virtual bool es_comentario_bloque(const char*&) const = 0;
+   virtual void salta_espacios(const char*&) const = 0;
+
+   bool es_literal_entera(const char*& p) const{
       if(isdigit(*p)){
          do{
             ++p;
-         }while(isdigit(*p));
+         }while(std::isdigit(*p));
          return true;
       }
       return false;
    }
 
-   bool es_identificador(char*& p) const{
-      if(isalpha(*p) || *p == '_'){
+   bool es_identificador(const char*& p) const{
+      if(std::isalpha(*p) || *p == '_'){
          do{
             ++p;
-         }while(isalnum(*p) || *p == '_' || *p == '-');
+         }while(std::isalnum(*p) || *p == '_' || *p == '-');
          return true;
       }
       return false;
    }
 
-   virtual ~lexer_base(){ }
+   bool es_simbolo(const char*& p) const{
+      const char* mejor = p;
+      for (int i = 1; i <= max_tam_simbolo; ++i) {
+         if(simbolos.contains(std::string(p, p + i))){
+            mejor = p + i;
+         }
+      }
+      if (p != mejor) {
+         p = mejor;
+         return true;
+      }
+      return false;
+   }
+
+   tipo_token token_id_palabra(const std::string& s) const{
+      auto itr = palabras.find(s);
+      return (itr != palabras.end() ? itr->second : IDENTIFICADOR);
+   }
+
+   tipo_token token_simbolo(const std::string& s) const{
+      return simbolos.find(s)->second;
+   }
 };
 
 struct token_registrado{
@@ -139,35 +180,22 @@ struct token_registrado{
       }
 };
 
-tipo_token token_palabra(const std::map<std::string, tipo_token>& palabras, const std::string& s){
-   auto itr = palabras.find(s);
-   if(itr != palabras.end()){
-      return itr->second;
-   }else{
-      return IDENTIFICADOR;
-   }
-}
-
-tipo_token token_operador(const std::map<std::string, tipo_token>& operadores, const std::string& s){
-   return operadores.find(s)->second;
-}
-
-std::vector<token_registrado> lexer(lexer_base* lb, std::string& s){
+std::vector<token_registrado> lexer(const lexer_base& lb, const std::string& s){
    std::vector<token_registrado> ans;
    auto ini = &s[0], fin = ini + s.size();
 
    while(true){
-      lb->salta_espacios(ini);
+      lb.salta_espacios(ini);
       auto temp = ini;
 
-      if(lb->es_comentario_linea(ini) || lb->es_comentario_bloque(ini)){
+      if(lb.es_comentario_linea(ini) || lb.es_comentario_bloque(ini)){
          continue;
-      }else if(lb->es_literal_entera(ini)){
+      }else if(lb.es_literal_entera(ini)){
          ans.emplace_back(LITERAL_ENTERA, temp, ini);
-      }else if(lb->es_operador(ini)){
-         ans.emplace_back(token_operador(lb->get_operadores(), std::string(temp, ini)), temp, ini);
-      }else if(lb->es_identificador(ini)){
-         ans.emplace_back(token_palabra(lb->get_palabras(), std::string(temp, ini)), temp, ini);
+      }else if(lb.es_identificador(ini)){
+         ans.emplace_back(lb.token_id_palabra(std::string(temp, ini)), temp, ini);
+      }else if(lb.es_simbolo(ini)){
+         ans.emplace_back(lb.token_simbolo(std::string(temp, ini)), temp, ini);
       }else if(ini == fin){
          ans.emplace_back(FIN_ARCHIVO, temp, ini + 1);
          break;

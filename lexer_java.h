@@ -1,14 +1,17 @@
 #ifndef LEXER_JAVA_H
 #define LEXER_JAVA_H
 
-#include "lexer_aux.h"
 #include "error.h"
+#include "lexer_aux.h"
 #include <cctype>
 #include <string>
-#include <map>
+#include <vector>
 
-struct lexer_java : lexer_base{ 
-   std::map<std::string, tipo_token> palabras = {
+struct lexer_java : lexer_base{
+   lexer_java( )
+   : lexer_base(
+   /* palabras */
+   {
       {"class", CLASS},
       {"program", PROGRAM},
       {"define", DEFINE},
@@ -44,9 +47,9 @@ struct lexer_java : lexer_base{
       {"notFacingWest", NORIENTADO_OESTE},
       {"else", ELSE},
       {"if", IF},
-   };
-
-   std::map<std::string, tipo_token> operadores = {
+   },
+   /* símbolos */
+   {
       {"!", NOT},
       {"||", OR},
       {"&&", AND},
@@ -56,17 +59,11 @@ struct lexer_java : lexer_base{
       {"{", LLAVE_IZQ},
       {"}", LLAVE_DER},
       {";", PUNTO_COMA}
-   };
-
-   std::map<std::string, tipo_token>& get_palabras(){
-      return palabras;
+   }) {
+      return;
    }
 
-   std::map<std::string, tipo_token>& get_operadores(){
-      return operadores;
-   }
-
-   bool es_comentario_linea(char*& p){
+   bool es_comentario_linea(const char*& p) const{
       if(std::string(p, p + 2) == "//"){
          p += 2;
          while(*p != '\n'){
@@ -77,7 +74,7 @@ struct lexer_java : lexer_base{
       return false;
    }
 
-   bool es_comentario_bloque(char*& p){
+   bool es_comentario_bloque(const char*& p) const{
       if(std::string(p, p + 2) == "/*"){
          p += 2;
          while(std::string(p, p + 2) != "*/"){
@@ -92,26 +89,11 @@ struct lexer_java : lexer_base{
       return false;
    }
 
-   bool es_operador(char*& p){
-      if(operadores.contains(std::string(p, p + 2))){
-         p += 2;
-         return true;
-      }else if(operadores.contains(std::string(p, p + 1))){
-         p += 1;
-         return true;
-      }
-
-      return false;
-   }
-
-   void salta_espacios(char*& p){
-      while(isspace(*p)){
+   void salta_espacios(const char*& p) const{
+      while(std::isspace(*p)){
          ++p;
       }
    }
-
-   ~lexer_java(){ }
 };
-
 
 #endif
