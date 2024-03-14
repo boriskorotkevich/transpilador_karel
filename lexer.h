@@ -4,7 +4,6 @@
 #include "error.h"
 #include <algorithm>
 #include <cctype>
-#include <algorithm>
 #include <iostream>
 #include <map>
 #include <string>
@@ -18,7 +17,7 @@ enum tipo_token{
    INICIO_PROG,      // pascal
    FIN_PROG,         // pascal
 
-   // tokens relacionados con main
+   // tokens relacionados con la función de arranque
 
    PROGRAM,          // java
    INICIO_EJE,       // pascal
