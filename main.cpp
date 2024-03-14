@@ -1,16 +1,17 @@
 #define DEBUG
 
+#include "debug.h"
+#include "error.h"
+#include "lexer.h"
+#include "lexer_java.h"
+#include "lexer_pascal.h"
+#include "lexer_ruby.h"
+
 #include <algorithm>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <sstream>
-
-#include "lexer_pascal.h"
-#include "lexer_java.h"
-#include "lexer_ruby.h"
-#include "debug.h"
-#include "error.h"
 
 int main(int argc, char* argv[]){
    if(argc != 4){
@@ -35,13 +36,13 @@ int main(int argc, char* argv[]){
       entrada = std::move(ss).str();
 
       std::vector<token_registrado> tokens;
-      if(*itr_vorigen == "pascal"){    // lexer_pascal
+      if(*itr_vorigen == "pascal"){
          lexer_pascal pascal;
          tokens = lexer(pascal, entrada);
-      }else if(*itr_vorigen == "java"){ // lexer_java
+      }else if(*itr_vorigen == "java"){
          lexer_java java;
          tokens = lexer(java, entrada);
-      }else{                           // lexer_ruby
+      }else{
          lexer_ruby ruby;
          tokens = lexer(ruby, entrada);
       }

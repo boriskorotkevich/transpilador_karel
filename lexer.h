@@ -1,6 +1,7 @@
-#ifndef LEXER_AUX_H
-#define LEXER_AUX_H
+#ifndef LEXER_H
+#define LEXER_H
 
+#include "error.h"
 #include <algorithm>
 #include <cctype>
 #include <algorithm>
@@ -9,8 +10,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "error.h"
 
 enum tipo_token{
    // tokens relacionados con el inicio y fin del programa

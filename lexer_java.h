@@ -2,7 +2,7 @@
 #define LEXER_JAVA_H
 
 #include "error.h"
-#include "lexer_aux.h"
+#include "lexer.h"
 #include <cctype>
 #include <string>
 #include <vector>
