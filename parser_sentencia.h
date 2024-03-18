@@ -17,10 +17,10 @@ struct sentencia {
    virtual ~sentencia( ) = 0;
 };
 
-struct sentencia_expresion : sentencia {
-   std::unique_ptr<expresion> ex;
-   sentencia_expresion(const control_vista& cv, std::unique_ptr<expresion> e)
-   : sentencia(cv), ex(std::move(e)) {
+struct sentencia_comando : sentencia {
+   const token_registrado& comando;
+   sentencia_comando(const control_vista& cv, const token_registrado& t)
+   : sentencia(cv), comando(t) {
    }
 };
 
@@ -43,36 +43,38 @@ struct sentencia_while : sentencia {
    }
 };
 
-// falta el iterate
-
-struct sentencia_iterate : sentencia{ // sentencia iterate
+struct sentencia_iterate : sentencia{
    std::unique_ptr<expresion> condicion;
-   std::vector<tsd::unique_ptr<sentencia>> cuerpo;
+   std::vector<std::unique_ptr<sentencia>> cuerpo;
 
    sentencia_while(const control_vista& cv, std::unique_ptr<expresion> c, std::vector<std::unique_ptr<sentencia>> v)
    : sentencia(cv), condicion(std::move(c)), cuerpo(std::move(v)) {
    }
-}
+};
+
+struct sentencia_llamada_usuario : expresion {
+   const token_registrado& funcion;
+   std::unique_ptr<expresion> parametro;
+
+   sentencia_llamada_usuario(const control_vista& cv, const token_registrado& f, std::unique_ptr<expresion> p)
+   : expresion(cv), funcion(f), parametro(std::move(p)) {
+   }
+};
 
 struct sentencia_return : sentencia {
-   sentencia_exit(const control_vista& cv)
+   sentencia_return(const control_vista& cv)
    : sentencia(cv) {
    }
 };
 
 std::unique_ptr<sentencia> stmt(const token_registrado*&);
 
-std::vector<std::unique_ptr<sentencia>> lista_stmt(const token_registrado*& p) {
-   std::vector<std::unique_ptr<sentencia>> res;
-   while (p->tipo != LLAVE_DER) {
-      res.push_back(stmt(p));
-   }
-   return res;
-}
-
 std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
    control_vista cv(p);
-   if (p->tipo == IF) {
+
+   if (es_comando(p->tipo)) {
+      // parsear sentencia_comando
+   } else if (p->tipo == IF) {
       auto ex = expr(++p);
       espera(p, LLAVE_IZQ);
       auto parte_si = lista_stmt(p), parte_no = decltype(parte_si)( );
@@ -83,27 +85,25 @@ std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
          espera(p, LLAVE_DER);
       }
       return std::make_unique<sentencia_if>(cv, std::move(ex), std::move(parte_si), std::move(parte_no));
-   } else if(p->tipo == ITERATE){
-      // ...
    } else if (p->tipo == WHILE) {
       auto ex = expr(++p);
       espera(p, LLAVE_IZQ);
       auto cuerpo = lista_stmt(p);
       espera(p, LLAVE_DER);
       return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
+   } else if(p->tipo == ITERATE){
+      auto ex = expr(++p);
+      espera(p, LLAVE_IZQ);
+      auto cuerpo = lista_stmt(p);
+      espera(p, LLAVE_DER);
+      return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
    } else if (p->tipo == RETURN) {
       espera(++p, PUNTO_COMA);
       return std::make_unique<sentencia_return>(cv);
+   } else if (p->tipo == IDENTIFICADOR) {
+      // parsear sentencia_llamada_usuario
    } else {
-      auto ex = expr(p);
-      if (p->tipo == IDENTIFICADOR) {
-         auto sen = stmt_declaracion(p, cv, std::move(ex), true);
-         espera(p, PUNTO_COMA);
-         return sen;
-      } else {
-         espera(p, PUNTO_COMA);
-         return std::make_unique<sentencia_expresion>(cv, std::move(ex));
-      }
+      throw error("Sentencia esperada", p->vista);
    }
 }
 
