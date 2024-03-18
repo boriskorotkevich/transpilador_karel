@@ -9,18 +9,26 @@
 #include <vector>
 
 struct declaracion_funcion {
-   std::unique_ptr<expresion> retorno;
    const token_registrado& nombre;
-   std::vector<std::unique_ptr<sentencia_declaracion>> parametros;
+   std::unique_ptr<expresion> parametro;
    std::vector<std::unique_ptr<sentencia>> cuerpo;
 };
 
 struct arbol_sintactico {
+   std::vector<declaracion_funcion> main;
    std::vector<declaracion_funcion> funciones;
 };
 
 declaracion_funcion parser_funcion(const token_registrado*& p) {
-   // por hacer (tarea 5)
+   espera(p, VOID);
+   auto nombre = espera(p, IDENTIFICADOR); 
+   espera(p, PARENTESIS_IZQ); 
+   auto parametro = expr(p);
+   espera(p, PARENTESIS_DER); 
+   espera(p, LLAVE_IZQ); 
+   auto cuerpo = lista_stmt(p); 
+   espera(p, LLAVE_DER); 
+   return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) }; 
 }
 
 arbol_sintactico parser(const std::vector<token_registrado>& tokens) {
