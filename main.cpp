@@ -6,6 +6,7 @@
 #include "lexer_java.h"
 #include "lexer_pascal.h"
 #include "lexer_ruby.h"
+#include "parser.h"
 
 #include <algorithm>
 #include <fstream>
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]){
       auto itr_vdestino = std::find(versiones.begin(), versiones.end(), argv[3]);
 
       if(itr_vorigen == versiones.end() || itr_vdestino == versiones.end()){
-         std::cout << "ERROR: Version de origen o destino no disponible" << std::endl;
+         std::cout << "---> ERROR: Version de origen o destino no disponible" << std::endl;
          return 0;
       }
 
@@ -52,6 +53,21 @@ int main(int argc, char* argv[]){
          std::cerr << tr << std::endl;
       }
 #endif
+
+   arbol_sintactico arbol = parser(tokens);
+
+#ifdef DEBUG
+   for(const auto& lista : arbol.funciones){
+      std::cout << lista<< std::endl;
+   }
+
+   for(const auto& lista : arbol.mains){
+      std::cout << "program (){" << std::endl;
+      std::cout << lista;
+      std::cout << "}" << std::endl << std::endl;
+   }
+#endif
+
    }catch(const error& e){
       auto [l, c] = posicion(entrada, e.vista);
       std::cout << "---> ERROR [" << l + 1 << " : " << c + 1 << "] | " << e.mensaje << std::endl;

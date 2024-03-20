@@ -68,6 +68,32 @@ void AhoritaNoJoven() {
 
 program() {
     VolteeseJoven(3);
+    while (frontIsClear && frontIsClear && !frontIsClear) {     
+        EncuentreUnBeeperJoven();
+        if (notNextToABeeper) {
+            RegreseseJoven();
+            VolteeseJoven(3);
+            move(); VolteeseJoven(3);
+            EncuentreUnBeeperJoven();
+            AhoritaNoJoven();
+        } else {
+            OrdeneloJoven();
+            if (nextToABeeper) {
+                RegreseseJoven();
+                turnleft(); move();
+            } else {
+                putbeeper();
+                RegreseseJoven();
+                turnleft(); move();
+                turnleft();
+            }
+        }
+    }
+    turnoff();
+}
+
+program() {
+    VolteeseJoven(3);
     while (frontIsClear) {     
         EncuentreUnBeeperJoven();
         if (notNextToABeeper) {

@@ -17,7 +17,7 @@ struct control_vista {
    }
 };
 
-const token_registrado* espera(const token_registrado*& p, token esperado) {
+const token_registrado* espera(const token_registrado*& p, tipo_token esperado) {
    if (p->tipo != esperado) {
       throw error("Token inesperado", p->vista);
    }
@@ -31,46 +31,56 @@ const token_registrado* espera(const token_registrado*& p, auto predicado) {
    return p++;
 }
 
-bool es_decl_funcion(token t) {
+const token_registrado* espera(const token_registrado*& p, const std::vector<tipo_token>& v){
+   for(auto token_esperado : v){
+      if(p->tipo != token_esperado){
+         throw error("Token inesperado", p->vista);
+      }
+      ++p;
+   }
+   return p;
+}
+
+bool es_decl_funcion(tipo_token t) {
    return t == VOID || t == DEFINE;
 }
 
-bool es_comando(token t) {
+bool es_comando(tipo_token t) {
    return t == AVANZA || t == APAGATE ||  t == GIRA_IZQ || t == COGE_ZUM || t == DEJA_ZUM;
 }
 
-bool es_operador_prefijo(token t) {
+bool es_operador_prefijo(tipo_token t) {
    return t == NOT;
 }
 
-bool es_operador_binario(token t) {
+bool es_operador_binario(tipo_token t) {
    return t == AND || t == OR;
 }
 
-bool es_booleano(token t){
+bool es_booleano(tipo_token t){
    return t == IZQUIERDA_LIB || t == IZQUIERDA_BLOQ || t == FRENTE_LIB || t == FRENTE_BLOQ
       || t == DERECHA_LIB || t == DERECHA_BLOQ || t == JUNTO_ZUM || t == NJUNTO_ZUM || t == ALGUN_ZUM_BAG
       || t == NINGUN_ZUM_BAG || t == ORIENTADO_NORTE || t == ORIENTADO_SUR || t == ORIENTADO_ESTE
       || t == ORIENTADO_OESTE || t == NORIENTADO_NORTE || t == NORIENTADO_SUR || t == NORIENTADO_ESTE || t == NORIENTADO_OESTE;
 }
 
-bool es_termino(token t) {
+bool es_termino(tipo_token t) {
    return es_booleano(t) || t == IDENTIFICADOR || t == LITERAL_ENTERA;
 }
 
-bool es_funcion_nativa(token t){
+bool es_funcion_nativa(tipo_token t){
    return t == PRECEDE || t == SUCEDE || t == ES_CERO;
 }
 
-bool es_inicio_expr(token t){
-   return es_termino(t) || es_operador_prefijo(t) || es_funcion_nativa(token t) || t == PARENTESIS_IZQ;
+bool es_inicio_expr(tipo_token t){
+   return es_termino(t) || es_operador_prefijo(t) || es_funcion_nativa(t) || t == PARENTESIS_IZQ;
 }
 
-int precedencia(token t) {
+int precedencia(tipo_token t) {
    return (t == OR ? 0 : ( t == AND ? 1 : -1 ));
 }
 
-int asociatividad(token t) {
+int asociatividad(tipo_token t) {
    // 0 para derecha, 1 para izquierda
    return 1;
 }

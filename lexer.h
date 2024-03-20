@@ -173,8 +173,13 @@ struct token_registrado{
    std::string_view vista;
 
    token_registrado() = default;
-   token_registrado(tipo_token _tipo, const char* ini, const char* fin)
-      : tipo(_tipo), vista(ini, fin - ini){
+
+   token_registrado(tipo_token t, std::string_view v) 
+      : tipo(t), vista(v){
+      }
+
+   token_registrado(tipo_token t, const char* ini, const char* fin)
+      : tipo(t), vista(ini, fin - ini){
       }
 };
 

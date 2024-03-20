@@ -15,7 +15,8 @@ struct expresion {
    : vista(cv) {
    }
 
-   virtual ~expresion( ) = 0;
+   virtual ~expresion() = default;
+
 };
 
 struct expresion_termino : expresion {
@@ -24,6 +25,7 @@ struct expresion_termino : expresion {
    expresion_termino(const control_vista& cv, const token_registrado& t)
    : expresion(cv), token(t) {
    }
+
 };
 
 struct expresion_binaria : expresion {
@@ -43,15 +45,17 @@ struct expresion_prefija : expresion {
    expresion_prefija(const control_vista& cv, const token_registrado& p, std::unique_ptr<expresion> e)
    : expresion(cv), op(p), ex(std::move(e)) {
    }
+
 };
 
 struct expresion_llamada_nativa : expresion {
-   const token_anotado& funcion;
+   const token_registrado& funcion;
    std::unique_ptr<expresion> parametro;
 
-   expresion_llamada_nativa(const control_vista& cv, const token_anotado& f, std::unique_ptr<expresion> p)
-   : expresion(cv), funcion(f), parametros(std::move(p)) {
+   expresion_llamada_nativa(const control_vista& cv, const token_registrado& f, std::unique_ptr<expresion> p)
+   : expresion(cv), funcion(f), parametro(std::move(p)) {
    }
+
 };
 
 std::unique_ptr<expresion> expr(const token_registrado*&);
@@ -60,13 +64,14 @@ std::unique_ptr<expresion> expr_unaria(const token_registrado*&);
 std::unique_ptr<expresion> expr_n_aria(const token_registrado*&, int);
 
 std::unique_ptr<expresion> expr_primaria(const token_registrado*& p) {
+   control_vista cv(p);
    if (es_funcion_nativa(p->tipo)) {
       auto funcion = p;
       auto param = expr(p += 2);
       espera(p, PARENTESIS_DER);
-      return std::make_unique<expresion_llamada_nativa>(*funcion, std::move(param));
+      return std::make_unique<expresion_llamada_nativa>(cv, *funcion, std::move(param));
    } else if (es_termino(p->tipo)) {
-      return std::make_unique<expresion_termino>(*p++);
+      return std::make_unique<expresion_termino>(cv, *p++);
    } else if (p->tipo == PARENTESIS_IZQ) {
       auto ex = expr(++p);
       espera(p, PARENTESIS_DER);
@@ -77,9 +82,10 @@ std::unique_ptr<expresion> expr_primaria(const token_registrado*& p) {
 }
 
 std::unique_ptr<expresion> expr_unaria(const token_registrado*& p) {
+   control_vista cv(p);
    if (es_operador_prefijo(p->tipo)) {
       auto operador = p;
-      return std::make_unique<expresion_prefija>(*operador, expr_unaria(++p));
+      return std::make_unique<expresion_prefija>(cv, *operador, expr_unaria(++p));
    } else {
       return expr_primaria(p);
    }
