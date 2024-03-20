@@ -79,8 +79,27 @@ std::vector<std::unique_ptr<sentencia>> lista_stmt(const token_registrado*& p) {
    return std::move(res);
 }
 
+std::vector<std::unique_ptr<sentencia>> one_stmt(const token_registrado*& p){
+   std::vector<std::unique_ptr<sentencia>> res;
+   res.push_back(stmt(p));
+   return std::move(res);
+}
+
 std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
    control_vista cv(p);
+
+   auto cuerpo_stmt = [&](const token_registrado*& p) -> std::vector<std::unique_ptr<sentencia>>{
+      std::vector<std::unique_ptr<sentencia>> ans;
+      if(p->tipo != LLAVE_IZQ){
+         ans = one_stmt(p);
+      }else{
+         espera(p, LLAVE_IZQ);
+         ans = lista_stmt(p);
+         espera(p, LLAVE_DER);
+      }
+
+      return std::move(ans);
+   };
 
    if (es_comando(p->tipo)) {
       auto comando = p;
@@ -88,26 +107,19 @@ std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
       return std::make_unique<sentencia_comando>(cv, *comando);
    } else if (p->tipo == IF) {
       auto ex = expr(++p);
-      espera(p, LLAVE_IZQ);
-      auto parte_si = lista_stmt(p), parte_no = decltype(parte_si)( );
-      espera(p, LLAVE_DER);
+      auto parte_si = cuerpo_stmt(p); 
+      auto parte_no = decltype(parte_si)( );
       if (p->tipo == ELSE) {
-         espera(++p, LLAVE_IZQ);
-         parte_no = lista_stmt(p);
-         espera(p, LLAVE_DER);
+         parte_no = cuerpo_stmt(++p);
       }
       return std::make_unique<sentencia_if>(cv, std::move(ex), std::move(parte_si), std::move(parte_no));
    } else if (p->tipo == WHILE) {
       auto ex = expr(++p);
-      espera(p, LLAVE_IZQ);
-      auto cuerpo = lista_stmt(p);
-      espera(p, LLAVE_DER);
+      auto cuerpo = cuerpo_stmt(p);
       return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
    } else if(p->tipo == ITERATE){
       auto ex = expr(++p);
-      espera(p, LLAVE_IZQ);
-      auto cuerpo = lista_stmt(p);
-      espera(p, LLAVE_DER);
+      auto cuerpo = cuerpo_stmt(p);
       return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
    } else if (p->tipo == RETURN) {
       espera(++p, PUNTO_COMA);

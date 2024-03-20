@@ -70,6 +70,6 @@ int main(int argc, char* argv[]){
 
    }catch(const error& e){
       auto [l, c] = posicion(entrada, e.vista);
-      std::cout << "---> ERROR [" << l + 1 << " : " << c + 1 << "] | " << e.mensaje << std::endl;
+      std::cout << "---> ERROR [" << l + 1 << " : " << c + 1 << "] | " << e.mensaje << " " << e.vista << std::endl;
    }
 }

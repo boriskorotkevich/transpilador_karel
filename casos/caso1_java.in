@@ -12,13 +12,6 @@ void TodoDerechoJoven() {
     }
 }
 
-void EncuentreUnBeeperJoven() {
-    while (notNextToABeeper &&
-        frontIsClear) {
-        move();
-        }
-}
-
 void RegreseseJoven() {
     VolteeseJoven(2);
     TodoDerechoJoven();
@@ -90,6 +83,21 @@ program() {
         }
     }
     turnoff();
+}
+/* Caso bien loco de anidamiento sin llaves */
+
+void EncuentreUnBeeperJoven() {
+    while (notNextToABeeper &&
+        frontIsClear) 
+          while (notNextToABeeper &&
+              frontIsClear) 
+                while (notNextToABeeper &&
+                    frontIsClear) 
+                      while (notNextToABeeper &&
+                       frontIsClear) 
+                          iterate(3)
+                             move();
+        
 }
 
 program() {

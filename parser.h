@@ -42,8 +42,11 @@ arbol_sintactico parser(const std::vector<token_registrado>& tokens) {
    auto p = &tokens[0];
    arbol_sintactico arbol;
    espera(p, {CLASS, PROGRAM, LLAVE_IZQ});
-   while (p-> tipo != LLAVE_DER && (p + 1)->tipo != FIN_ARCHIVO) {
-      if(p->tipo == PROGRAM){
+   while (p <= &tokens[tokens.size() - 1]) {
+      if((p + 1)->tipo == FIN_ARCHIVO){
+         espera(p, LLAVE_DER);
+         break;
+      }else if(p->tipo == PROGRAM){
          arbol.mains.push_back(parser_main(p));
       }else{
          arbol.funciones.push_back(parser_funcion(p));
