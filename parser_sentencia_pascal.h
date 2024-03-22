@@ -85,81 +85,65 @@ std::vector<std::unique_ptr<sentencia>> one_stmt(const token_registrado*& p){
    return std::move(res);
 }
 
+void espera_fin_stmt(const token_registrado*& p, const std::vector<tipo_token>& v){
+   int cont = 0;
+   for(const auto& token_no_esperado : v){
+      cont += (p->tipo != token_no_esperado);
+   }
+
+   if(cont == v.size()){
+      espera(p, PUNTO_COMA);
+   }
+}
+
 std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
    control_vista cv(p);
 
+   auto cuerpo_stmt = [&](const token_registrado*& p, const std::vector<tipo_token>& v)
+      -> std::vector<std::unique_ptr<sentencia>> {
+         std::vector<std::unique_ptr<sentencia>> cuerpo;
+         if(p->tipo == INICIO){
+            cuerpo = lista_stmt(++p);
+            espera(p, FIN);
+            espera_fin_stmt(p, v);
+         }else{
+            cuerpo = one_stmt(p);
+         }
+      return std::move(cuerpo);
+      };
+
+
    if (es_comando(p->tipo)) {
       auto comando = p++;
-      if(p->tipo != SINO && p->tipo != FIN && p->tipo != FIN_EJE){
-         espera(p, PUNTO_COMA);
-      }      
+      espera_fin_stmt(p, {SINO, FIN, FIN_EJE});
       return std::make_unique<sentencia_comando>(cv, *comando);
    } else if (p->tipo == SI) {
       auto ex = expr(++p);
       espera(p, ENTONCES);
-      std::vector<std::unique_ptr<sentencia>> parte_si;
-      if(p->tipo == INICIO){
-         parte_si = lista_stmt(++p);
-         espera(p, FIN);
-         if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
-            espera(p, PUNTO_COMA);
-         }
-      }else{
-         parte_si = one_stmt(p);
-      }
+      auto parte_si = cuerpo_stmt(p, {FIN, SINO, FIN_EJE});
       auto parte_no = decltype(parte_si)( );
       if (p->tipo == SINO) {
-         if((p + 1)->tipo == INICIO){
-            parte_no = lista_stmt(p += 2);
-            espera(p, FIN);
-            if(p->tipo != FIN && p->tipo != FIN_EJE){
-               espera(p, PUNTO_COMA);
-            }
-         }else{
-            parte_no = one_stmt(++p);
-         }
+         parte_no = cuerpo_stmt(++p, {FIN, FIN_EJE});
       }
       return std::make_unique<sentencia_if>(cv, std::move(ex), std::move(parte_si), std::move(parte_no));
    } else if (p->tipo == MIENTRAS) {
       auto ex = expr(++p);
       espera(p, HACER);
-      std::vector<std::unique_ptr<sentencia>> cuerpo;
-      if(p->tipo == INICIO){
-         cuerpo = lista_stmt(++p);
-         espera(p, FIN);
-         if(p->tipo != FIN && p->tipo != FIN_EJE){
-            espera(p, PUNTO_COMA);
-         }
-      }else{
-         cuerpo = one_stmt(p);
-      }
+      auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
       return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
    } else if(p->tipo == REPETIR && ((p + 1)->tipo == LITERAL_ENTERA || (p + 1)->tipo == IDENTIFICADOR)){
       auto ex = expr(++p);
       espera(p, VECES);
-      std::vector<std::unique_ptr<sentencia>> cuerpo;
-      if(p->tipo == INICIO){
-         cuerpo = lista_stmt(++p);
-         espera(p, FIN);
-         if(p->tipo != FIN && p->tipo != FIN_EJE){
-            espera(p, PUNTO_COMA);
-         }
-      }else{
-         cuerpo = one_stmt(p);
-      }
+      auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
       return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
    } else if (p->tipo == SAL_INS) {
       espera(p, SAL_INS);
-      if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
-         espera(p, PUNTO_COMA);
-      }
+      espera_fin_stmt(p, {FIN, SINO, FIN_EJE});
       return std::make_unique<sentencia_return>(cv);
    } else if (p->tipo == IDENTIFICADOR) {
       auto nombre = espera(p, IDENTIFICADOR);
       auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
-      if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
-         espera(p, PUNTO_COMA);
-      }
+      espera_fin_stmt(p, {FIN, SINO, FIN_EJE});
       return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
    } else {
       throw error("Sentencia esperada", p->vista);
