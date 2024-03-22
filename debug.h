@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "lexer.h"
-#include "parser.h"
+#include "parser_pascal.h"
 
 std::ostream& operator<<(std::ostream& os, const token_registrado& tr){
    os << tr.tipo << " " << tr.vista;

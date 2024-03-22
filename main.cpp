@@ -6,7 +6,7 @@
 #include "lexer_java.h"
 #include "lexer_pascal.h"
 #include "lexer_ruby.h"
-#include "parser.h"
+#include "parser_pascal.h"
 
 #include <algorithm>
 #include <fstream>
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
       }
 #endif
 
-   arbol_sintactico arbol = parser(tokens);
+   arbol_sintactico arbol = parser_pascal(tokens);
 
 #ifdef DEBUG
    for(const auto& lista : arbol.funciones){

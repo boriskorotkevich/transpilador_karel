@@ -41,8 +41,12 @@ const token_registrado* espera(const token_registrado*& p, const std::vector<tip
    return p;
 }
 
-bool es_decl_funcion(tipo_token t) {
+bool es_decl_funcion_java(tipo_token t) {
    return t == VOID || t == DEFINE;
+}
+
+bool es_decl_funcion_pascal(tipo_token t){
+   return t == DEFN_INS;
 }
 
 bool es_comando(tipo_token t) {

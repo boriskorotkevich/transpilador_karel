@@ -73,7 +73,7 @@ std::unique_ptr<sentencia> stmt(const token_registrado*&);
 
 std::vector<std::unique_ptr<sentencia>> lista_stmt(const token_registrado*& p) {
    std::vector<std::unique_ptr<sentencia>> res;
-   while (p->tipo != LLAVE_DER) {
+   while (p->tipo != FIN && p->tipo != FIN_EJE) {
       res.push_back(stmt(p));
    }
    return std::move(res);
@@ -88,47 +88,78 @@ std::vector<std::unique_ptr<sentencia>> one_stmt(const token_registrado*& p){
 std::unique_ptr<sentencia> stmt(const token_registrado*& p) {
    control_vista cv(p);
 
-   auto cuerpo_stmt = [&](const token_registrado*& p) -> std::vector<std::unique_ptr<sentencia>>{
-      std::vector<std::unique_ptr<sentencia>> ans;
-      if(p->tipo != LLAVE_IZQ){
-         ans = one_stmt(p);
-      }else{
-         espera(p, LLAVE_IZQ);
-         ans = lista_stmt(p);
-         espera(p, LLAVE_DER);
-      }
-
-      return std::move(ans);
-   };
-
    if (es_comando(p->tipo)) {
-      auto comando = p;
-      espera(++p, {PARENTESIS_IZQ, PARENTESIS_DER, PUNTO_COMA});
+      auto comando = p++;
+      if(p->tipo != SINO && p->tipo != FIN && p->tipo != FIN_EJE){
+         espera(p, PUNTO_COMA);
+      }      
       return std::make_unique<sentencia_comando>(cv, *comando);
-   } else if (p->tipo == IF && (p + 1)->tipo == PARENTESIS_IZQ) {
+   } else if (p->tipo == SI) {
       auto ex = expr(++p);
-      auto parte_si = cuerpo_stmt(p); 
+      espera(p, ENTONCES);
+      std::vector<std::unique_ptr<sentencia>> parte_si;
+      if(p->tipo == INICIO){
+         parte_si = lista_stmt(++p);
+         espera(p, FIN);
+         if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
+            espera(p, PUNTO_COMA);
+         }
+      }else{
+         parte_si = one_stmt(p);
+      }
       auto parte_no = decltype(parte_si)( );
-      if (p->tipo == ELSE) {
-         parte_no = cuerpo_stmt(++p);
+      if (p->tipo == SINO) {
+         if((p + 1)->tipo == INICIO){
+            parte_no = lista_stmt(p += 2);
+            espera(p, FIN);
+            if(p->tipo != FIN && p->tipo != FIN_EJE){
+               espera(p, PUNTO_COMA);
+            }
+         }else{
+            parte_no = one_stmt(++p);
+         }
       }
       return std::make_unique<sentencia_if>(cv, std::move(ex), std::move(parte_si), std::move(parte_no));
-   } else if (p->tipo == WHILE && (p + 1)->tipo == PARENTESIS_IZQ) {
+   } else if (p->tipo == MIENTRAS) {
       auto ex = expr(++p);
-      auto cuerpo = cuerpo_stmt(p);
+      espera(p, HACER);
+      std::vector<std::unique_ptr<sentencia>> cuerpo;
+      if(p->tipo == INICIO){
+         cuerpo = lista_stmt(++p);
+         espera(p, FIN);
+         if(p->tipo != FIN && p->tipo != FIN_EJE){
+            espera(p, PUNTO_COMA);
+         }
+      }else{
+         cuerpo = one_stmt(p);
+      }
       return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
-   } else if(p->tipo == ITERATE && (p + 1)->tipo == PARENTESIS_IZQ){
+   } else if(p->tipo == REPETIR && ((p + 1)->tipo == LITERAL_ENTERA || (p + 1)->tipo == IDENTIFICADOR)){
       auto ex = expr(++p);
-      auto cuerpo = cuerpo_stmt(p);
+      espera(p, VECES);
+      std::vector<std::unique_ptr<sentencia>> cuerpo;
+      if(p->tipo == INICIO){
+         cuerpo = lista_stmt(++p);
+         espera(p, FIN);
+         if(p->tipo != FIN && p->tipo != FIN_EJE){
+            espera(p, PUNTO_COMA);
+         }
+      }else{
+         cuerpo = one_stmt(p);
+      }
       return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
-   } else if (p->tipo == RETURN) {
-      espera(++p, PUNTO_COMA);
+   } else if (p->tipo == SAL_INS) {
+      espera(p, SAL_INS);
+      if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
+         espera(p, PUNTO_COMA);
+      }
       return std::make_unique<sentencia_return>(cv);
    } else if (p->tipo == IDENTIFICADOR) {
-      auto nombre = p;
-      espera(++p, PARENTESIS_IZQ);
-      std::unique_ptr<expresion> parametro = (p->tipo == IDENTIFICADOR || p->tipo == LITERAL_ENTERA ? std::make_unique<expresion_termino>(control_vista(p), *p++) : nullptr);
-      espera(p, {PARENTESIS_DER, PUNTO_COMA});
+      auto nombre = espera(p, IDENTIFICADOR);
+      auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
+      if(p->tipo != FIN && p->tipo != SINO && p->tipo != FIN_EJE){
+         espera(p, PUNTO_COMA);
+      }
       return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
    } else {
       throw error("Sentencia esperada", p->vista);

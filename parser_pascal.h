@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "parser_aux.h"
 #include "parser_expresion.h"
-#include "parser_sentencia.h"
+#include "parser_sentencia_pascal.h"
 
 #include <memory>
 #include <vector>
@@ -15,45 +15,59 @@ struct declaracion_funcion {
    std::vector<std::unique_ptr<sentencia>> cuerpo;
 };
 
+struct declaracion_prototipo{
+   const token_registrado& nombre;
+   std::unique_ptr<expresion> parametro;
+};
+
 struct arbol_sintactico {
    std::vector<std::vector<std::unique_ptr<sentencia>>> mains;
+   std::vector<declaracion_prototipo> prototipos;
    std::vector<declaracion_funcion> funciones;
 };
 
 declaracion_funcion parser_funcion(const token_registrado*& p) {
-   espera(p, es_decl_funcion_java);
+   espera(p, es_decl_funcion_pascal);
    auto nombre = espera(p, IDENTIFICADOR);
-   espera(p, PARENTESIS_IZQ);
-   std::unique_ptr<expresion> parametro = (p->tipo != IDENTIFICADOR ? nullptr : std::make_unique<expresion_termino>(control_vista(p), *p++));
-   espera(p, {PARENTESIS_DER, LLAVE_IZQ});
+   auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
+   espera(p, {COMO, INICIO});
    auto cuerpo = lista_stmt(p);
-   espera(p, LLAVE_DER);
+   espera(p, {FIN, PUNTO_COMA});
    return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
 }
 
 std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p){
-   espera(p, {PROGRAM, PARENTESIS_IZQ, PARENTESIS_DER, LLAVE_IZQ});
+   espera(p, INICIO_EJE);
    auto cuerpo = lista_stmt(p);
-   espera(p, LLAVE_DER);
+   espera(p, FIN_EJE);
    return std::move(cuerpo);
 }
 
-arbol_sintactico parser_java(const std::vector<token_registrado>& tokens) {
+declaracion_prototipo parser_prot(const token_registrado*& p){
+   espera(p, DEFP_INS);
+   auto nombre = espera(p, IDENTIFICADOR);
+   auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
+   espera(p, PUNTO_COMA);
+   return declaracion_prototipo{*nombre, std::move(parametro)};
+}
+
+arbol_sintactico parser_pascal(const std::vector<token_registrado>& tokens) {
    auto p = &tokens[0];
    arbol_sintactico arbol;
-   std::cout << "estoy en parser java jaja" << std::endl;
-   espera(p, {CLASS, PROGRAM, LLAVE_IZQ});
+   espera(p, INICIO_PROG);
    while (p <= &tokens[tokens.size() - 1]) {
       if((p + 1)->tipo == FIN_ARCHIVO){
-         espera(p, LLAVE_DER);
+         espera(p, FIN_PROG);
          break;
-      }else if(p->tipo == PROGRAM){
+      }else if(p->tipo == INICIO_EJE){
          arbol.mains.push_back(parser_main(p));
-      }else{
+      }else if(p->tipo == DEFN_INS){
          arbol.funciones.push_back(parser_funcion(p));
+      }else if(p->tipo == DEFP_INS){
+         arbol.prototipos.push_back(parser_prot(p));
       }
    }
-   return arbol;
+   return std::move(arbol);
 }
 
 #endif

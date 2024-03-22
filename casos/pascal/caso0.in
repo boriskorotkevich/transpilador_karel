@@ -5,7 +5,7 @@ de bloque *)
 
 iniciar-programa
    define-nueva-instruccion f(n) como inicio
-      si (junto-a-zumbador) y no o u y e(izquierda-libre) entonces inicio
+      si (junto-a-zumbador) y (izquierda-libre) entonces inicio
          coge-zumbador;
       fin;
       repetir n veces inicio
