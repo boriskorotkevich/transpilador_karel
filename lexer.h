@@ -174,7 +174,7 @@ struct token_registrado{
 
    token_registrado() = default;
 
-   token_registrado(tipo_token t, std::string_view v) 
+   token_registrado(tipo_token t, std::string_view v)
       : tipo(t), vista(v){
       }
 
@@ -207,7 +207,7 @@ std::vector<token_registrado> lexer(const lexer_base& lb, const std::string& s){
       }
    }
 
-   return std::move(ans);
+   return ans;
 }
 
 #endif

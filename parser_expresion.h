@@ -3,65 +3,20 @@
 
 #include "error.h"
 #include "lexer.h"
+#include "parser.h"
 #include "parser_aux.h"
-#include <memory>
-#include <utility>
-#include <vector>
-
-struct expresion {
-   std::string_view vista;
-
-   expresion(const control_vista& cv)
-   : vista(cv) {
-   }
-
-   virtual ~expresion() = default;
-
-};
-
-struct expresion_termino : expresion {
-   const token_registrado& token;
-
-   expresion_termino(const control_vista& cv, const token_registrado& t)
-   : expresion(cv), token(t) {
-   }
-
-};
-
-struct expresion_binaria : expresion {
-   std::unique_ptr<expresion> izq;
-   const token_registrado& op;
-   std::unique_ptr<expresion> der;
-
-   expresion_binaria(const control_vista& cv, std::unique_ptr<expresion> i, const token_registrado& p, std::unique_ptr<expresion> d)
-   : expresion(cv), izq(std::move(i)), op(p), der(std::move(d)) {
-   }
-};
-
-struct expresion_prefija : expresion {
-   const token_registrado& op;
-   std::unique_ptr<expresion> ex;
-
-   expresion_prefija(const control_vista& cv, const token_registrado& p, std::unique_ptr<expresion> e)
-   : expresion(cv), op(p), ex(std::move(e)) {
-   }
-
-};
-
-struct expresion_llamada_nativa : expresion {
-   const token_registrado& funcion;
-   std::unique_ptr<expresion> parametro;
-
-   expresion_llamada_nativa(const control_vista& cv, const token_registrado& f, std::unique_ptr<expresion> p)
-   : expresion(cv), funcion(f), parametro(std::move(p)) {
-   }
-
-};
 
 std::unique_ptr<expresion> expr(const token_registrado*&);
 std::unique_ptr<expresion> expr_primaria(const token_registrado*&);
 std::unique_ptr<expresion> expr_unaria(const token_registrado*&);
 std::unique_ptr<expresion> expr_n_aria(const token_registrado*&, int);
+
+/*const token_registrado*& imprimible(const token_registrado*& p) {
+   while (p->tipo == SALTO_LINEA) {
+      ++p;
+   }
+   return p;
+}*/
 
 std::unique_ptr<expresion> expr_primaria(const token_registrado*& p) {
    control_vista cv(p);

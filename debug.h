@@ -37,9 +37,9 @@ std::ostream& operator<<(std::ostream& os, const std::unique_ptr<sentencia>& s){
    if(auto ans = dynamic_cast<const sentencia_comando*>(s.get()); ans != nullptr){
       return os << ans->comando.vista << "();";
    }else if(auto ans = dynamic_cast<const sentencia_if*>(s.get()); ans != nullptr){
-      return os << "if(" << ans->condicion << "){" << std::endl << ans->parte_si << "}else{" << std::endl << ans->parte_no << "}"; 
+      return os << "if(" << ans->condicion << "){" << std::endl << ans->parte_si << "}else{" << std::endl << ans->parte_no << "}";
    }else if(auto ans = dynamic_cast<const sentencia_while*>(s.get()); ans != nullptr){
-      return os << "while(" << ans->condicion << "){" << std::endl << ans->cuerpo << "}"; 
+      return os << "while(" << ans->condicion << "){" << std::endl << ans->cuerpo << "}";
    }else if(auto ans = dynamic_cast<const sentencia_iterate*>(s.get()); ans != nullptr){
       return os << "iterate(" << ans->condicion << "){" << std::endl << ans->cuerpo << "}";
    }else if(auto ans = dynamic_cast<const sentencia_llamada_usuario*>(s.get()); ans != nullptr){

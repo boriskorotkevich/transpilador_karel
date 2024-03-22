@@ -2,20 +2,8 @@
 #define PARSER_AUX_H
 
 #include "lexer.h"
+#include <initializer_list>
 #include <string_view>
-
-struct control_vista {
-   const token_registrado* ini;
-   const token_registrado*& ref;
-
-   control_vista(const token_registrado*& p)
-   : ini(p), ref(p) {
-   }
-
-   explicit operator std::string_view( ) const {
-      return { ini->vista.begin( ), size_t(ini == ref ? 0 : (ref - 1)->vista.end( ) - ini->vista.begin( )) };
-   }
-};
 
 const token_registrado* espera(const token_registrado*& p, tipo_token esperado) {
    if (p->tipo != esperado) {
@@ -31,7 +19,7 @@ const token_registrado* espera(const token_registrado*& p, auto predicado) {
    return p++;
 }
 
-const token_registrado* espera(const token_registrado*& p, const std::vector<tipo_token>& v){
+const token_registrado* espera(const token_registrado*& p, std::initializer_list<tipo_token> v){
    for(auto token_esperado : v){
       if(p->tipo != token_esperado){
          throw error("Token inesperado", p->vista);

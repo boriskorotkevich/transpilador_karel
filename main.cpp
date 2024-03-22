@@ -6,7 +6,10 @@
 #include "lexer_java.h"
 #include "lexer_pascal.h"
 #include "lexer_ruby.h"
+#include "parser.h"
+#include "parser_java.h"
 #include "parser_pascal.h"
+//#include "parser_ruby.h"
 
 #include <algorithm>
 #include <fstream>
@@ -54,18 +57,25 @@ int main(int argc, char* argv[]){
       }
 #endif
 
-   arbol_sintactico arbol = parser_pascal(tokens);
+      arbol_sintactico arbol;
+      if(*itr_vorigen == "pascal"){
+         parser_pascal pascal;
+         arbol = parser(pascal, tokens);
+      }else if(*itr_vorigen == "java"){
+         parser_java java;
+         arbol = parser(java, tokens);
+      }else{
+         //parser_ruby ruby;
+         //arbol = parser(ruby, tokens);
+      }
 
 #ifdef DEBUG
-   for(const auto& lista : arbol.funciones){
-      std::cout << lista<< std::endl;
-   }
-
-   for(const auto& lista : arbol.mains){
-      std::cout << "program (){" << std::endl;
-      std::cout << lista;
-      std::cout << "}" << std::endl << std::endl;
-   }
+      for(const auto& lista : arbol.funciones){
+         std::cerr << lista<< std::endl;
+      }
+      for(const auto& lista : arbol.mains){
+         std::cerr << "program (){\n" << lista << "}\n" << std::endl;
+      }
 #endif
 
    }catch(const error& e){
