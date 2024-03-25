@@ -69,7 +69,7 @@ private:
          espera(p, HACER);
          auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
          return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
-      } else if(p->tipo == REPETIR && ((p + 1)->tipo == LITERAL_ENTERA || (p + 1)->tipo == IDENTIFICADOR)){
+      } else if(p->tipo == REPETIR && es_iterate_expr((p + 1)->tipo)){
          auto ex = expr(++p);
          espera(p, VECES);
          auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
