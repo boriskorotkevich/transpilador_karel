@@ -18,7 +18,7 @@ struct lexer_ruby : lexer_base{
       {"gira-izquierda", GIRA_IZQ},
       {"avanza", AVANZA},
       {"coge-zumbador", COGE_ZUM},
-      {"deja_zumbador", DEJA_ZUM},
+      {"deja-zumbador", DEJA_ZUM},
       {"fin", FIN},
       {"veces", VECES},
       {"mientras", MIENTRAS},

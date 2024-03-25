@@ -9,7 +9,7 @@
 #include "parser.h"
 #include "parser_java.h"
 #include "parser_pascal.h"
-//#include "parser_ruby.h"
+#include "parser_ruby.h"
 
 #include <algorithm>
 #include <fstream>
@@ -65,8 +65,8 @@ int main(int argc, char* argv[]){
          parser_java java;
          arbol = parser(java, tokens);
       }else{
-         //parser_ruby ruby;
-         //arbol = parser(ruby, tokens);
+         parser_ruby ruby;
+         arbol = parser(ruby, tokens);
       }
 
 #ifdef DEBUG

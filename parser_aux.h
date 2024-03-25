@@ -5,6 +5,13 @@
 #include <initializer_list>
 #include <string_view>
 
+const token_registrado*& skipws(const token_registrado*& p) {
+   while (p->tipo == SALTO_LINEA) {
+      ++p;
+   }
+   return p;
+}
+
 const token_registrado* espera(const token_registrado*& p, tipo_token esperado) {
    if (p->tipo != esperado) {
       throw error("Token inesperado", p->vista);
@@ -19,7 +26,7 @@ const token_registrado* espera(const token_registrado*& p, auto predicado) {
    return p++;
 }
 
-const token_registrado* espera(const token_registrado*& p, std::initializer_list<tipo_token> v){
+const token_registrado* espera_seq(const token_registrado*& p, std::initializer_list<tipo_token> v){
    for(auto token_esperado : v){
       if(p->tipo != token_esperado){
          throw error("Token inesperado", p->vista);
@@ -29,12 +36,22 @@ const token_registrado* espera(const token_registrado*& p, std::initializer_list
    return p;
 }
 
+bool es_funcion_usuario(const token_registrado*& p){
+   bool flag = (skipws(p)->tipo == IDENTIFICADOR && skipws(++p)->tipo == PARENTESIS_IZQ);
+   --p;
+   return flag;
+}
+
 bool es_decl_funcion_java(tipo_token t) {
    return t == VOID || t == DEFINE;
 }
 
 bool es_decl_funcion_pascal(tipo_token t){
    return t == DEFN_INS;
+}
+
+bool es_decl_funcion_ruby(tipo_token t){
+   return t == DEF;
 }
 
 bool es_comando(tipo_token t) {
@@ -62,6 +79,10 @@ bool es_termino(tipo_token t) {
 
 bool es_funcion_nativa(tipo_token t){
    return t == PRECEDE || t == SUCEDE || t == ES_CERO;
+}
+
+bool es_iterate_expr(tipo_token t){
+   return es_funcion_nativa(t) || t == IDENTIFICADOR || t == LITERAL_ENTERA;
 }
 
 bool es_inicio_expr(tipo_token t){

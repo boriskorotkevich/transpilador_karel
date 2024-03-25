@@ -1,14 +1,52 @@
 #TODO poner codigo aqui
-avanza
-gira-izquierda
-gira-izquierda
-gira-izquierda
-si (frente-libre) y (orientado-al-este) y no (algun-zumbador-en-la-mochila)
+def camina(n)
    avanza
+fin
+
+def retrocede(m)
    gira-izquierda
-sino 
-   deja-zumbador
-   mientras frente-libre # Comentario de linea
-      avanza
+   gira-izquierda
+   avanza
+fin
+
+def gira(n)
+   gira-izquierda
+fin
+
+si frente-libre y 
+orientado-al-norte
+  si 
+  algun-zumbador-en-la-mochila
+   deja-zumbador   
+   avanza
+  fin
+fin
+
+3 veces
+   coge-zumbador
+   avanza
+fin
+
+si no-orientado-al-norte
+   gira(sucede(10))
+sino
+   gira(precede(10))
+fin
+
+def analiza(m)
+   m veces
+      coge-zumbador
+      si no orientado-al-oeste
+           camina(m)
+      sino
+     	gira(m)
+        sal-de-instruccion
+      fin
+   fin
+fin
+
+si no-orientado-al-sur
+   2 veces
+      gira-izquierda
    fin
 fin

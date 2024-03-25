@@ -42,7 +42,7 @@ private:
 
       if (es_comando(p->tipo)) {
          auto comando = p;
-         espera(++p, {PARENTESIS_IZQ, PARENTESIS_DER, PUNTO_COMA});
+         espera_seq(++p, {PARENTESIS_IZQ, PARENTESIS_DER, PUNTO_COMA});
          return std::make_unique<sentencia_comando>(cv, *comando);
       } else if (p->tipo == IF && (p + 1)->tipo == PARENTESIS_IZQ) {
          auto ex = expr(++p);
@@ -66,8 +66,8 @@ private:
       } else if (p->tipo == IDENTIFICADOR) {
          auto nombre = p;
          espera(++p, PARENTESIS_IZQ);
-         std::unique_ptr<expresion> parametro = (p->tipo == IDENTIFICADOR || p->tipo == LITERAL_ENTERA ? std::make_unique<expresion_termino>(control_vista(p), *p++) : nullptr);
-         espera(p, {PARENTESIS_DER, PUNTO_COMA});
+         auto parametro = (p->tipo != PARENTESIS_DER ? expr(p) : nullptr);
+         espera_seq(p, {PARENTESIS_DER, PUNTO_COMA});
          return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
       } else {
          throw error("Sentencia esperada", p->vista);
@@ -80,15 +80,15 @@ private:
       espera(p, es_decl_funcion_java);
       auto nombre = espera(p, IDENTIFICADOR);
       espera(p, PARENTESIS_IZQ);
-      std::unique_ptr<expresion> parametro = (p->tipo != IDENTIFICADOR ? nullptr : std::make_unique<expresion_termino>(control_vista(p), *p++));
-      espera(p, {PARENTESIS_DER, LLAVE_IZQ});
+      auto parametro = (p->tipo != PARENTESIS_DER ? expr(p) : nullptr);
+      espera_seq(p, {PARENTESIS_DER, LLAVE_IZQ});
       auto cuerpo = lista_stmt(p);
       espera(p, LLAVE_DER);
       return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
    }
 
    std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p) const {
-      espera(p, {PROGRAM, PARENTESIS_IZQ, PARENTESIS_DER, LLAVE_IZQ});
+      espera_seq(p, {PROGRAM, PARENTESIS_IZQ, PARENTESIS_DER, LLAVE_IZQ});
       auto cuerpo = lista_stmt(p);
       espera(p, LLAVE_DER);
       return std::move(cuerpo);
@@ -96,7 +96,7 @@ private:
 
 public:
    void parser_arbol(const token_registrado*& p, arbol_sintactico& arbol) const {
-      espera(p, {CLASS, PROGRAM, LLAVE_IZQ});
+      espera_seq(p, {CLASS, PROGRAM, LLAVE_IZQ});
       while (p->tipo != LLAVE_DER) {
          if(p->tipo == PROGRAM){
             arbol.mains.push_back(parser_main(p));

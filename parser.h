@@ -13,7 +13,7 @@ struct control_vista {
    const token_registrado*& ref;
 
    control_vista(const token_registrado*& p)
-   : ini(p), ref(p) {
+   : ini(skipws(p)), ref(skipws(p)) {
    }
 
    explicit operator std::string_view( ) const {

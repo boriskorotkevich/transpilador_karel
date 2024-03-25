@@ -94,9 +94,9 @@ private:
       espera(p, es_decl_funcion_pascal);
       auto nombre = espera(p, IDENTIFICADOR);
       auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
-      espera(p, {COMO, INICIO});
+      espera_seq(p, {COMO, INICIO});
       auto cuerpo = lista_stmt(p);
-      espera(p, {FIN, PUNTO_COMA});
+      espera_seq(p, {FIN, PUNTO_COMA});
       return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
    }
 
