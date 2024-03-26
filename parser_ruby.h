@@ -27,7 +27,7 @@ private:
          return std::make_unique<sentencia_comando>(cv, *comando);
       } else if (p->tipo == SI) {
          auto ex = expr(++p);
-         auto parte_si = lista_stmt(p); 
+         auto parte_si = lista_stmt(p);
          auto parte_no = decltype(parte_si)( );
          if (p->tipo == SINO) {
             espera(++p, SALTO_LINEA);
@@ -40,7 +40,11 @@ private:
          auto cuerpo = lista_stmt(p);
          espera_seq(p, {FIN, SALTO_LINEA});
          return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
-      } else if((p->tipo == LITERAL_ENTERA || es_funcion_nativa(p->tipo) || p->tipo == IDENTIFICADOR) && !es_funcion_usuario(p)){
+      } else if (p->tipo == IDENTIFICADOR && (p + 1)->tipo == PARENTESIS_IZQ) {
+         auto nombre = p++;
+         auto parametro = expr(p);
+         return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
+      } else if(p->tipo == LITERAL_ENTERA || es_funcion_nativa(p->tipo) || p->tipo == IDENTIFICADOR) {
          auto ex = expr(p);
          espera(skipws(p), VECES);
          auto cuerpo = lista_stmt(p);
@@ -49,10 +53,6 @@ private:
       } else if (p->tipo == SAL_INS) {
          espera(++p, SALTO_LINEA);
          return std::make_unique<sentencia_return>(cv);
-      } else if (p->tipo == IDENTIFICADOR) {
-         auto nombre = p++;
-         auto parametro = expr(p);
-         return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
       } else {
          throw error("Sentencia esperada", p->vista);
       }
@@ -73,21 +73,15 @@ private:
 
 public:
    void parser_arbol(const token_registrado*& p, arbol_sintactico& arbol) const {
+      arbol.mains.resize(1);
       while (skipws(p)->tipo != FIN_ARCHIVO) {
          if(p->tipo == DEF) {
             arbol.funciones.push_back(parser_funcion(p));
          }else{
-            arbol.mains.push_back(lista_stmt(p));
+            auto temp = lista_stmt(p);
+            arbol.mains[0].insert(arbol.mains[0].end( ), std::move_iterator(temp.begin( )), std::move_iterator(temp.end( )));
          }
       }
-
-//      if(arbol.mains.size() > 1){
-//         for(int i = 1; i < arbol.mains.size(); ++i){
-//            for(const auto& actual_stmt : arbol.mains[i]){
-//               arbol.mains[0].emplace_back(actual_stmt);
-//            }
-//         }
-//      }
    }
 };
 

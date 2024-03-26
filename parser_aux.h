@@ -36,12 +36,6 @@ const token_registrado* espera_seq(const token_registrado*& p, std::initializer_
    return p;
 }
 
-bool es_funcion_usuario(const token_registrado*& p){
-   bool flag = (skipws(p)->tipo == IDENTIFICADOR && skipws(++p)->tipo == PARENTESIS_IZQ);
-   --p;
-   return flag;
-}
-
 bool es_decl_funcion_java(tipo_token t) {
    return t == VOID || t == DEFINE;
 }

@@ -15,7 +15,7 @@ std::unique_ptr<expresion> expr_primaria(const token_registrado*& p) {
    control_vista cv(p);
    if (es_funcion_nativa(skipws(p)->tipo)) {
       auto funcion = p;
-      espera(++p, PARENTESIS_IZQ);
+      espera(skipws(++p), PARENTESIS_IZQ);
       auto param = expr(p);
       espera(skipws(p), PARENTESIS_DER);
       return std::make_unique<expresion_llamada_nativa>(cv, *funcion, std::move(param));
