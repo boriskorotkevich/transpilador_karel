@@ -60,9 +60,6 @@ private:
          auto ex = expr(++p);
          auto cuerpo = cuerpo_stmt(p);
          return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
-      } else if (p->tipo == RETURN) {
-         espera(++p, PUNTO_COMA);
-         return std::make_unique<sentencia_return>(cv);
       } else if (p->tipo == IDENTIFICADOR) {
          auto nombre = p;
          espera(++p, PARENTESIS_IZQ);
@@ -80,11 +77,11 @@ private:
       espera(p, es_decl_funcion_java);
       auto nombre = espera(p, IDENTIFICADOR);
       espera(p, PARENTESIS_IZQ);
-      auto parametro = (p->tipo != PARENTESIS_DER ? expr(p) : nullptr);
+      auto parametro = (p->tipo == IDENTIFICADOR ? p++ : nullptr);
       espera_seq(p, {PARENTESIS_DER, LLAVE_IZQ});
       auto cuerpo = lista_stmt(p);
       espera(p, LLAVE_DER);
-      return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
+      return declaracion_funcion{*nombre, parametro, std::move(cuerpo) };
    }
 
    std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p) const {

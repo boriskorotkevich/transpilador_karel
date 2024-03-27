@@ -12,14 +12,14 @@ private:
 
    std::vector<std::unique_ptr<sentencia>> lista_stmt(const token_registrado*& p) const {
       std::vector<std::unique_ptr<sentencia>> res;
-      while (skipws(p)->tipo != FIN && p->tipo != DEF && p->tipo != SINO && p->tipo != FIN_ARCHIVO) {
+      while (skipws(p)->tipo != SINO && p->tipo != FIN && p->tipo != DEF && p->tipo != FIN_ARCHIVO) {
          res.push_back(stmt(p));
       }
       return res;
    }
 
    std::unique_ptr<sentencia> stmt(const token_registrado*& p) const {
-      control_vista cv(p);
+      control_vista cv(skipws(p));
 
       if (es_comando(p->tipo)) {
          auto comando = p;
@@ -29,7 +29,7 @@ private:
          auto ex = expr(++p);
          auto parte_si = lista_stmt(p);
          auto parte_no = decltype(parte_si)( );
-         if (p->tipo == SINO) {
+         if (skipws(p)->tipo == SINO) {
             espera(++p, SALTO_LINEA);
             parte_no = lista_stmt(p);
          }
@@ -38,21 +38,19 @@ private:
       } else if (p->tipo == MIENTRAS) {
          auto ex = expr(++p);
          auto cuerpo = lista_stmt(p);
-         espera_seq(p, {FIN, SALTO_LINEA});
+         espera_seq(skipws(p), {FIN, SALTO_LINEA});
          return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
       } else if (p->tipo == IDENTIFICADOR && (p + 1)->tipo == PARENTESIS_IZQ) {
          auto nombre = p++;
-         auto parametro = expr(p);
+         auto parametro = expr(++p);
+         espera_seq(skipws(p), {PARENTESIS_DER, SALTO_LINEA});
          return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
       } else if(p->tipo == LITERAL_ENTERA || es_funcion_nativa(p->tipo) || p->tipo == IDENTIFICADOR) {
          auto ex = expr(p);
-         espera(skipws(p), VECES);
+         espera_seq(skipws(p), {VECES, SALTO_LINEA});
          auto cuerpo = lista_stmt(p);
-         espera_seq(p, {FIN, SALTO_LINEA});
+         espera_seq(skipws(p), {FIN, SALTO_LINEA});
          return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
-      } else if (p->tipo == SAL_INS) {
-         espera(++p, SALTO_LINEA);
-         return std::make_unique<sentencia_return>(cv);
       } else {
          throw error("Sentencia esperada", p->vista);
       }
@@ -64,11 +62,11 @@ private:
       espera(skipws(p), es_decl_funcion_ruby);
       auto nombre = espera(skipws(p), IDENTIFICADOR);
       espera(skipws(p), PARENTESIS_IZQ);
-      auto parametro = expr(p);
-      espera(skipws(p), PARENTESIS_DER);
+      auto parametro = (p->tipo == IDENTIFICADOR ? p++ : nullptr);
+      espera_seq(skipws(p), {PARENTESIS_DER, SALTO_LINEA});
       auto cuerpo = lista_stmt(p);
-      espera_seq(p, {FIN, SALTO_LINEA});
-      return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
+      espera_seq(skipws(p), {FIN, SALTO_LINEA});
+      return declaracion_funcion{*nombre, parametro, std::move(cuerpo) };
    }
 
 public:

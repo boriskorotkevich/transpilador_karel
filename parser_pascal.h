@@ -74,10 +74,6 @@ private:
          espera(p, VECES);
          auto cuerpo = cuerpo_stmt(p, {FIN, SINO, FIN_EJE});
          return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
-      } else if (p->tipo == SAL_INS) {
-         espera(p, SAL_INS);
-         espera_fin_stmt(p, {FIN, SINO, FIN_EJE});
-         return std::make_unique<sentencia_return>(cv);
       } else if (p->tipo == IDENTIFICADOR) {
          auto nombre = espera(p, IDENTIFICADOR);
          auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
@@ -93,11 +89,27 @@ private:
    declaracion_funcion parser_funcion(const token_registrado*& p) const {
       espera(p, es_decl_funcion_pascal);
       auto nombre = espera(p, IDENTIFICADOR);
-      auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
+      auto parametro = (const token_registrado*)nullptr;
+      if (p->tipo == PARENTESIS_IZQ) {
+         parametro = espera(++p, IDENTIFICADOR);
+         espera(p, PARENTESIS_DER);
+      }
       espera_seq(p, {COMO, INICIO});
       auto cuerpo = lista_stmt(p);
       espera_seq(p, {FIN, PUNTO_COMA});
       return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
+   }
+
+   declaracion_prototipo parser_prot(const token_registrado*& p) const {
+      espera(p, DEFP_INS);
+      auto nombre = espera(p, IDENTIFICADOR);
+      auto parametro = (const token_registrado*)nullptr;
+      if (p->tipo == PARENTESIS_IZQ) {
+         parametro = espera(++p, IDENTIFICADOR);
+         espera(p, PARENTESIS_DER);
+      }
+      espera(p, PUNTO_COMA);
+      return declaracion_prototipo{*nombre, parametro};
    }
 
    std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p) const {
@@ -105,14 +117,6 @@ private:
       auto cuerpo = lista_stmt(p);
       espera(p, FIN_EJE);
       return std::move(cuerpo);
-   }
-
-   declaracion_prototipo parser_prot(const token_registrado*& p) const {
-      espera(p, DEFP_INS);
-      auto nombre = espera(p, IDENTIFICADOR);
-      auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
-      espera(p, PUNTO_COMA);
-      return declaracion_prototipo{*nombre, std::move(parametro)};
    }
 
 public:

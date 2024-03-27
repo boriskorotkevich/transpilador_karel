@@ -129,23 +129,18 @@ struct sentencia_llamada_usuario : sentencia {
    }
 };
 
-struct sentencia_return : sentencia {
-   sentencia_return(const control_vista& cv)
-   : sentencia(cv) {
-   }
-};
 
 // tipos para árbol sintáctico
 
 struct declaracion_funcion {
    const token_registrado& nombre;
-   std::unique_ptr<expresion> parametro;
+   const token_registrado* parametro;
    std::vector<std::unique_ptr<sentencia>> cuerpo;
 };
 
 struct declaracion_prototipo {
    const token_registrado& nombre;
-   std::unique_ptr<expresion> parametro;
+   const token_registrado* parametro;
 };
 
 struct arbol_sintactico {

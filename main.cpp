@@ -38,6 +38,7 @@ int main(int argc, char* argv[]){
       std::stringstream ss;
       f >> ss.rdbuf();
       entrada = std::move(ss).str();
+      entrada.push_back('\n');
 
       std::vector<token_registrado> tokens;
       if(*itr_vorigen == "pascal"){
