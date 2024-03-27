@@ -53,7 +53,7 @@ private:
 
       if (es_comando(p->tipo)) {
          auto comando = p++;
-         espera_fin_stmt(p, {SINO, FIN, FIN_EJE});
+         espera_fin_stmt(p, {FIN, SINO, FIN_EJE});
          return std::make_unique<sentencia_comando>(cv, *comando);
       } else if (p->tipo == SI) {
          auto ex = expr(++p);
@@ -67,12 +67,12 @@ private:
       } else if (p->tipo == MIENTRAS) {
          auto ex = expr(++p);
          espera(p, HACER);
-         auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
+         auto cuerpo = cuerpo_stmt(p, {FIN, SINO, FIN_EJE});
          return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
       } else if(p->tipo == REPETIR){
          auto ex = expr(++p);
          espera(p, VECES);
-         auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
+         auto cuerpo = cuerpo_stmt(p, {FIN, SINO, FIN_EJE});
          return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
       } else if (p->tipo == SAL_INS) {
          espera(p, SAL_INS);
