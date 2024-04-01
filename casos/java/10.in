@@ -1,0 +1,61 @@
+class program {
+    program () {
+  	if(
+          frontIsClear            ||
+	  frontIsBlocked()        ||
+          leftIsClear             ||
+          leftIsBlocked()         ||
+          rightIsClear            ||
+          rightIsBlocked()        ||
+          nextToABeeper           ||
+          notNextToABeeper()      ||
+          anyBeepersInBeeperBag   ||
+          noBeepersInBeeperBag()  ||
+          facingNorth             ||
+          facingSouth()           ||
+          facingEast              ||
+          facingWest()            ||
+          notFacingNorth()        ||
+          notFacingSouth          ||
+          notFacingEast()         ||
+          notFacingWest
+          ){
+            move();
+            pickbeeper();
+            putbeeper();
+            return();
+            turnleft();
+            turnoff();
+            while(
+              frontIsClear            &&
+              frontIsBlocked()        &&
+              leftIsClear             &&
+              leftIsBlocked()         &&
+              rightIsClear            &&
+              rightIsBlocked()        &&
+              nextToABeeper           &&
+              notNextToABeeper()      &&
+              anyBeepersInBeeperBag   &&
+              noBeepersInBeeperBag()  &&
+              facingNorth             &&
+              facingSouth()           &&
+              facingEast              &&
+              facingWest()            &&
+              notFacingNorth()        &&
+              notFacingSouth          &&
+              notFacingEast()         &&
+              notFacingWest
+              ){
+              	move();
+                pickbeeper();
+                putbeeper();
+                return();
+                turnleft();
+                turnoff();
+            }
+              
+            iterate (succ(succ(succ(succ(succ(pred(pred(succ(pred(succ(pred(10))))))))))));  
+      }
+              
+  }
+}

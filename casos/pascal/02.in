@@ -1,4 +1,8 @@
 iniciar-programa
+    define-prototipo-instruccion girar(a);
+    define-prototipo-instruccion intentar(b);
+    define-prototipo-instruccion incrementar(c);
+
     define-nueva-instruccion girar(n) como inicio
         repetir n veces inicio
             gira-izquierda;

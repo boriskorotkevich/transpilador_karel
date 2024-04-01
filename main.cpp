@@ -53,9 +53,7 @@ int main(int argc, char* argv[]){
       }
 
 #ifdef DEBUG
-      for(const token_registrado& tr : tokens){
-         std::cerr << tr << std::endl;
-      }
+      for(const token_registrado& tr : tokens){std::cerr << tr << std::endl;}
 #endif
 
       arbol_sintactico arbol;
@@ -71,12 +69,9 @@ int main(int argc, char* argv[]){
       }
 
 #ifdef DEBUG
-      for(const auto& lista : arbol.funciones){
-         std::cerr << lista<< std::endl;
-      }
-      for(const auto& lista : arbol.mains){
-         std::cerr << "program (){\n" << lista << "}\n" << std::endl;
-      }
+      for(const auto& lista : arbol.prototipos){std::cerr << lista << std::endl;}
+      for(const auto& lista : arbol.funciones){std::cerr << lista << std::endl;}
+      for(const auto& lista : arbol.mains){std::cerr << "program(){\n" << lista << "}\n" << std::endl;}
 #endif
 
    }catch(const error& e){

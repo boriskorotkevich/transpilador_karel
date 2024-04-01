@@ -1,22 +1,16 @@
 class program {
 
 void VolteeseJoven(n) {
-    iterate(n){
-      turnleft();
-    }  
+    iterate(n) turnleft();
 }
 
 void TodoDerechoJoven() {
-    while (frontIsClear) {
-    move();
-    }
+    while (frontIsClear) move();
 }
 
 void EncuentreUnBeeperJoven() {
     while (notNextToABeeper &&
-        frontIsClear) {
-        move();
-        }
+        frontIsClear) move();
 }
 
 void RegreseseJoven() {
@@ -28,12 +22,8 @@ void OrdeneloJoven() {
     if (nextToABeeper) {
         pickbeeper();
         OrdeneloJoven();
-        if
-        (facingEast){ move();
-        }
-        else {
-        VolteeseJoven(3);
-        }
+        if (facingEast) move();
+        else VolteeseJoven(3);
     } else {
         RegreseseJoven();
         VolteeseJoven(3);
@@ -42,11 +32,8 @@ void OrdeneloJoven() {
 }
 
 void AhoritaNoJoven() {
-    while
-    (nextToABeeper &&
-        frontIsClear) {
-        move();
-        }
+    while (nextToABeeper &&
+        frontIsClear) move();
     if (frontIsClear) {
         EncuentreUnBeeperJoven();
         if (nextToABeeper) {
@@ -91,4 +78,5 @@ program() {
     }
     turnoff();
 }
+
 }

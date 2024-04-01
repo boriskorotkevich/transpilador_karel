@@ -20,7 +20,12 @@ std::unique_ptr<expresion> expr_primaria(const token_registrado*& p) {
       espera(skipws(p), PARENTESIS_DER);
       return std::make_unique<expresion_llamada_nativa>(cv, *funcion, std::move(param));
    } else if (es_termino(p->tipo)) {
-      return std::make_unique<expresion_termino>(cv, *p++);
+      auto termino = p++;
+      if(es_booleano(termino->tipo) && p->tipo == PARENTESIS_IZQ){
+         espera(p, PARENTESIS_IZQ);
+         espera(p, PARENTESIS_DER);
+      }
+      return std::make_unique<expresion_termino>(cv, *termino);
    } else if (p->tipo == PARENTESIS_IZQ) {
       auto ex = expr(++p);
       espera(skipws(p), PARENTESIS_DER);

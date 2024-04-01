@@ -1,11 +1,10 @@
 iniciar-programa
-	define-prototipo-instruccion mavanza(n);
     define-nueva-instruccion gira(n) como inicio
-    	repetir n veces gira-izquierda        
+    	repetir n veces gira-izquierda;        
     fin;
     
     define-nueva-instruccion mavanza(n) como inicio
-    	repetir n veces avanza
+    	repetir n veces avanza;
     fin;
     
     
@@ -15,20 +14,23 @@ iniciar-programa
         	coge-zumbador;
             si no junto-a-zumbador entonces inicio
             	gira-izquierda;
-                apagate
-            fin
+                apagate;
+            fin;
         fin;     
-        si frente-libre entonces segundocero
+        si frente-libre entonces segundocero;
     fin;
     
     define-nueva-instruccion primercero como inicio 
     	avanza;
-        si (junto-a-zumbador) entonces inicio 
+        si junto-a-zumbador entonces inicio 
         	coge-zumbador;
-        si no junto-a-zumbador entonces sal-de-instruccion
+            si no junto-a-zumbador entonces sal-de-instruccion;
         fin;     
-        si frente-libre entonces sal-de-instruccion
-        sino gira-izquierda;
+        si frente-libre entonces primercero
+        sino inicio
+        	gira-izquierda;
+            apagate;
+        fin;
     fin;
     
     
@@ -36,27 +38,27 @@ iniciar-programa
     	repetir n veces inicio
         	gira(2);
         	primercero;
-            si frente-libre entonces inicio repetir n veces avanza
-            fin sino gira-izquierda
+            si frente-libre entonces segundocero;
+            gira(2);
+            mavanza(n);
         fin;
-        mientras (no orientado-al-norte) hacer inicio gira-izquierda
-        fin;
-        apagate
+        mientras no orientado-al-norte hacer gira-izquierda;
+        apagate;
     fin;
     
     define-nueva-instruccion cuenta(n) como inicio
     	si junto-a-zumbador y frente-libre entonces inicio
         	avanza;
-            cuenta(sucede(sucede(sucede(n))));
+            cuenta(sucede(n));
         fin sino inicio
-        	resuelve(n)
-        fin        
+        	resuelve(n);
+        fin;        
     fin;
     
     inicia-ejecucion
         gira(3);
         cuenta(0);
         
-        apagate
+        apagate;
     termina-ejecucion
 finalizar-programa

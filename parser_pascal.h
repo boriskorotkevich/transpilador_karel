@@ -79,6 +79,12 @@ private:
          auto parametro = (p->tipo == PARENTESIS_IZQ ? expr(p) : nullptr);
          espera_fin_stmt(p, {FIN, SINO, FIN_EJE});
          return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
+      }  else if(p->tipo == INICIO){
+         auto cuerpo = cuerpo_stmt(p, {FIN, FIN_EJE});
+         return std::make_unique<sentencia_bloque>(cv, std::move(cuerpo));
+      } else if(p->tipo == PUNTO_COMA){
+         ++p;
+         return std::make_unique<sentencia_vacia>(cv);
       } else {
          throw error("Sentencia esperada", p->vista);
       }

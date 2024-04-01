@@ -129,6 +129,18 @@ struct sentencia_llamada_usuario : sentencia {
    }
 };
 
+struct sentencia_bloque : sentencia {
+   std::vector<std::unique_ptr<sentencia>> cuerpo;
+   sentencia_bloque(const control_vista& cv, std::vector<std::unique_ptr<sentencia>> v)
+   : sentencia(cv),  cuerpo(std::move(v)){
+   }
+};
+
+struct sentencia_vacia : sentencia{
+   sentencia_vacia(const control_vista& cv)
+   : sentencia(cv){
+   }
+};
 
 // tipos para árbol sintáctico
 

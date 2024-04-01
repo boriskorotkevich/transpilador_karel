@@ -1,0 +1,19 @@
+class program{
+   program(){
+      if(frontIsClear)
+         if(frontIsBlocked)
+    	    if(leftIsClear)
+               if(leftIsBlocked)
+                  if(rightIsBlocked)
+                     if(nextToABeeper)
+                        iterate(succ(10))
+                          while(facingSouth)
+                             while(notFacingEast)
+                                move();
+                                pickbeeper();
+                                putbeeper();
+                                return();
+                                turnleft();
+                                turnoff();
+  }
+}

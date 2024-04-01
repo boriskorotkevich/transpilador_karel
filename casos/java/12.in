@@ -1,0 +1,32 @@
+class program{
+   program(){
+      if(facingNorth){
+         move();
+         ;
+         return();
+         while(notFacingSouth && notFacingNorth){
+            turnleft();
+            turnleft();
+         }
+         {
+            move();
+            {
+               move();
+               while(facingEast || !notFacingEast){{{
+                  iterate(3){
+                     pickbeeper();;
+                  }
+                  putbeeper();;;;
+                  ;
+                  ;
+                  ;
+               }}}
+            }
+         }
+      }
+      while(notFacingWest());;;
+      {
+      ;
+      }
+   }
+}

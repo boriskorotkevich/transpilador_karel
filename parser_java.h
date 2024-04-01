@@ -29,7 +29,9 @@ private:
 
       auto cuerpo_stmt = [&](const token_registrado*& p) -> std::vector<std::unique_ptr<sentencia>>{
          std::vector<std::unique_ptr<sentencia>> ans;
-         if(p->tipo != LLAVE_IZQ){
+         if(p->tipo == PUNTO_COMA){
+            espera(p, PUNTO_COMA);
+         }else if(p->tipo != LLAVE_IZQ){
             ans = one_stmt(p);
          }else{
             espera(p, LLAVE_IZQ);
@@ -66,7 +68,14 @@ private:
          auto parametro = (p->tipo != PARENTESIS_DER ? expr(p) : nullptr);
          espera_seq(p, {PARENTESIS_DER, PUNTO_COMA});
          return std::make_unique<sentencia_llamada_usuario>(cv, *nombre, std::move(parametro));
-      } else {
+      } else if(p->tipo == LLAVE_IZQ){
+         auto cuerpo = lista_stmt(++p);
+         espera(p, LLAVE_DER);
+         return std::make_unique<sentencia_bloque>(cv, std::move(cuerpo));
+      }else if(p->tipo == PUNTO_COMA){
+         ++p;
+         return std::make_unique<sentencia_vacia>(cv);
+      }else {
          throw error("Sentencia esperada", p->vista);
       }
    }
