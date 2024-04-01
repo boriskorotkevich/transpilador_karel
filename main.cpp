@@ -10,6 +10,7 @@
 #include "parser_java.h"
 #include "parser_pascal.h"
 #include "parser_ruby.h"
+#include "semantico.h"
 
 #include <algorithm>
 #include <fstream>
@@ -53,7 +54,7 @@ int main(int argc, char* argv[]){
       }
 
 #ifdef DEBUG
-      for(const token_registrado& tr : tokens){std::cerr << tr << std::endl;}
+      std::cerr << tokens << std::endl;
 #endif
 
       arbol_sintactico arbol;
@@ -69,10 +70,10 @@ int main(int argc, char* argv[]){
       }
 
 #ifdef DEBUG
-      for(const auto& lista : arbol.prototipos){std::cerr << lista << std::endl;}
-      for(const auto& lista : arbol.funciones){std::cerr << lista << std::endl;}
-      for(const auto& lista : arbol.mains){std::cerr << "program(){\n" << lista << "}\n" << std::endl;}
+      std::cerr << arbol << std::endl;
 #endif
+
+      tabla_simbolos tabla = semantico(arbol, tokens.back( ));
 
    }catch(const error& e){
       auto [l, c] = posicion(entrada, e.vista);

@@ -18,28 +18,18 @@ private:
       return std::move(res);
    }
 
-   std::vector<std::unique_ptr<sentencia>> one_stmt(const token_registrado*& p) const {
-      std::vector<std::unique_ptr<sentencia>> res;
-      res.push_back(stmt(p));
-      return std::move(res);
-   }
-
    std::unique_ptr<sentencia> stmt(const token_registrado*& p) const {
       control_vista cv(p);
 
       auto cuerpo_stmt = [&](const token_registrado*& p) -> std::vector<std::unique_ptr<sentencia>>{
          std::vector<std::unique_ptr<sentencia>> ans;
-         if(p->tipo == PUNTO_COMA){
-            espera(p, PUNTO_COMA);
-         }else if(p->tipo != LLAVE_IZQ){
-            ans = one_stmt(p);
-         }else{
-            espera(p, LLAVE_IZQ);
-            ans = lista_stmt(p);
+         if(p->tipo == LLAVE_IZQ){
+            ans = lista_stmt(++p);
             espera(p, LLAVE_DER);
+         }else{
+            ans.push_back(stmt(p));
          }
-
-         return std::move(ans);
+         return ans;
       };
 
       if (es_comando(p->tipo)) {

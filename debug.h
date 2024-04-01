@@ -10,6 +10,13 @@ std::ostream& operator<<(std::ostream& os, const token_registrado& tr){
    return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const std::vector<token_registrado>& tokens){
+   for(const token_registrado& tr : tokens){
+      std::cerr << tr << std::endl;
+   }
+   return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const std::unique_ptr<expresion>& e){
    if(auto ans = dynamic_cast<const expresion_termino*>(e.get()); ans != nullptr){
       return os << ans->token.vista;
@@ -72,6 +79,19 @@ std::ostream& operator<<(std::ostream& os, const declaracion_prototipo& decl_fun
       os << decl_fun.parametro->vista;
    }
    os << ");" << std::endl;
+   return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const arbol_sintactico& arbol){
+   for(const auto& lista : arbol.prototipos){
+      os << lista << std::endl;
+   }
+   for(const auto& lista : arbol.funciones){
+      os << lista << std::endl;
+   }
+   for(const auto& lista : arbol.mains){
+      os << "program(){\n" << lista << "}\n" << std::endl;
+   }
    return os;
 }
 
