@@ -147,18 +147,12 @@ struct sentencia_vacia : sentencia{
 struct declaracion_funcion {
    const token_registrado& nombre;
    const token_registrado* parametro;
-   std::vector<std::unique_ptr<sentencia>> cuerpo;
-};
-
-struct declaracion_prototipo {
-   const token_registrado& nombre;
-   const token_registrado* parametro;
+   std::unique_ptr<std::vector<std::unique_ptr<sentencia>>> cuerpo;
 };
 
 struct arbol_sintactico {
    std::vector<std::vector<std::unique_ptr<sentencia>>> mains;
    std::vector<declaracion_funcion> funciones;
-   std::vector<declaracion_prototipo> prototipos;
 };
 
 // parser base y algoritmo principal

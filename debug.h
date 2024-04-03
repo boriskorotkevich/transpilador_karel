@@ -69,23 +69,13 @@ std::ostream& operator<<(std::ostream& os, const declaracion_funcion& decl_fun){
    if (decl_fun.parametro != nullptr) {
       os << decl_fun.parametro->vista;
    }
-   os << "){" << std::endl << decl_fun.cuerpo << "}" << std::endl;
-   return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const declaracion_prototipo& decl_fun){
-   os << "void " << decl_fun.nombre.vista << "(";
-   if (decl_fun.parametro != nullptr) {
-      os << decl_fun.parametro->vista;
+   if (decl_fun.cuerpo != nullptr) {
+      os << "){" << std::endl << *decl_fun.cuerpo << "}" << std::endl;
    }
-   os << ");" << std::endl;
    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const arbol_sintactico& arbol){
-   for(const auto& lista : arbol.prototipos){
-      os << lista << std::endl;
-   }
    for(const auto& lista : arbol.funciones){
       os << lista << std::endl;
    }

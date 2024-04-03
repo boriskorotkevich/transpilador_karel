@@ -11,24 +11,41 @@
 #include <vector>
 
 struct tabla_simbolos {
-   std::map<std::string_view, const declaracion_funcion*> funciones;
-   std::map<std::string_view, const declaracion_prototipo*> prototipos;
+   bool sensitivo;
+   std::map<std::string, const declaracion_funcion*> funciones;
+
+   tabla_simbolos(bool s)
+   : sensitivo(s) {
+   }
+
+   bool inserta(const std::string_view& s, const declaracion_funcion* d) {
+      return inserta_simbolo(funciones, s, d, sensitivo);
+   }
+
+   const declaracion_funcion* busca(const std::string_view& s) const {
+      return busca_simbolo(funciones, s, sensitivo);
+   }
 };
 
 struct pila_simbolos {
+   bool sensitivo;
    const tabla_simbolos& tabla;
-   std::map<std::string_view, const token_registrado*> bloque;
+   std::map<std::string, const token_registrado*> bloque;
+
+   pila_simbolos(const tabla_simbolos& t)
+   : sensitivo(t.sensitivo), tabla(t) {
+   }
+
+   bool inserta(const std::string_view& s, const token_registrado* p) {
+      return inserta_simbolo(bloque, s, p, sensitivo);
+   }
 
    const declaracion_funcion* busca_funcion(const std::string_view& s) const {
-      auto iter = tabla.funciones.find(s);
-      return (iter != tabla.funciones.end( ) ? iter->second : nullptr);
+      return tabla.busca(s);
    }
 
    const token_registrado* busca_variable(const std::string_view& s) const {
-      if (auto iter = bloque.find(s); iter != bloque.end( )) {
-         return iter->second;
-      }
-      return nullptr;
+      return busca_simbolo(bloque, s, sensitivo);
    }
 };
 
@@ -133,31 +150,25 @@ void evalua(const sentencia_vacia* s, auto& pila) {
    return;
 }
 
-tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo) {
-   tabla_simbolos tabla;
-
-   for (const auto& prototipo : arbol.prototipos){
-      if(!tabla.prototipos.emplace(prototipo.nombre.vista, &prototipo).second){
-         throw error("Declaracion de prototipo repetida", prototipo.nombre.vista);
-      }
-   }
+tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo, bool sensitivo) {
+   tabla_simbolos tabla(sensitivo);
 
    for (const auto& funcion : arbol.funciones) {
-      if (!tabla.funciones.emplace(funcion.nombre.vista, &funcion).second) {
+      if (!tabla.inserta(funcion.nombre.vista, &funcion)) {
          throw error("Nombre de funcion repetida", funcion.nombre.vista);
       }
    }
 
    for (const auto& funcion : arbol.funciones) {
-      auto& decl = tabla.funciones.find(funcion.nombre.vista)->second;
+      auto decl = tabla.busca(funcion.nombre.vista);
       pila_simbolos pila(tabla);
       if (decl->parametro != nullptr) {
-         pila.bloque.emplace(decl->parametro->vista, decl->parametro);
+         pila.inserta(decl->parametro->vista, decl->parametro);
       }
 
-      for (const auto& sentencia : decl->cuerpo) {
+      /*for (const auto& sentencia : decl->cuerpo) {
          evalua(sentencia, pila);
-      }
+      }*/
    }
 
    if (arbol.mains.empty( )) {

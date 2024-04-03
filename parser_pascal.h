@@ -103,10 +103,10 @@ private:
       espera_seq(p, {COMO, INICIO});
       auto cuerpo = lista_stmt(p);
       espera_seq(p, {FIN, PUNTO_COMA});
-      return declaracion_funcion{*nombre, std::move(parametro), std::move(cuerpo) };
+      return declaracion_funcion{*nombre, std::move(parametro), std::make_unique<std::vector<std::unique_ptr<sentencia>>>(std::move(cuerpo)) };
    }
 
-   declaracion_prototipo parser_prot(const token_registrado*& p) const {
+   declaracion_funcion parser_prot(const token_registrado*& p) const {
       espera(p, DEFP_INS);
       auto nombre = espera(p, IDENTIFICADOR);
       auto parametro = (const token_registrado*)nullptr;
@@ -115,7 +115,7 @@ private:
          espera(p, PARENTESIS_DER);
       }
       espera(p, PUNTO_COMA);
-      return declaracion_prototipo{*nombre, parametro};
+      return declaracion_funcion{*nombre, parametro , nullptr};
    }
 
    std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p) const {
@@ -132,7 +132,7 @@ public:
          if(p->tipo == DEFN_INS){
             arbol.funciones.push_back(parser_funcion(p));
          }else if(p->tipo == DEFP_INS){
-            arbol.prototipos.push_back(parser_prot(p));
+            arbol.funciones.push_back(parser_prot(p));
          } else {
             arbol.mains.push_back(parser_main(p));
          }

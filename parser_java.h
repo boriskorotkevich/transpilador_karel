@@ -80,7 +80,7 @@ private:
       espera_seq(p, {PARENTESIS_DER, LLAVE_IZQ});
       auto cuerpo = lista_stmt(p);
       espera(p, LLAVE_DER);
-      return declaracion_funcion{*nombre, parametro, std::move(cuerpo) };
+      return declaracion_funcion{*nombre, std::move(parametro), std::make_unique<std::vector<std::unique_ptr<sentencia>>>(std::move(cuerpo)) };
    }
 
    std::vector<std::unique_ptr<sentencia>> parser_main(const token_registrado*& p) const {

@@ -66,7 +66,7 @@ private:
       espera_seq(skipws(p), {PARENTESIS_DER, SALTO_LINEA});
       auto cuerpo = lista_stmt(p);
       espera_seq(skipws(p), {FIN, SALTO_LINEA});
-      return declaracion_funcion{*nombre, parametro, std::move(cuerpo) };
+      return declaracion_funcion{*nombre, std::move(parametro), std::make_unique<std::vector<std::unique_ptr<sentencia>>>(std::move(cuerpo)) };
    }
 
 public:

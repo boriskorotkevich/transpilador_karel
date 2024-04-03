@@ -5,12 +5,31 @@
 #include "lexer.h"
 #include "parser.h"
 #include <charconv>
+#include <iterator>
+#include <string>
 #include <vector>
 #include <stddef.h>
 
 enum tipo_evaluado {
    INT, BOOL
 };
+
+std::string toupper_str(const std::string_view& s) {
+   std::string res;
+   std::transform(res.begin( ), res.end( ), std::back_inserter(res), ::toupper);
+   return res;
+}
+
+template<typename T>
+bool inserta_simbolo(std::map<std::string, T*>& mapa, const std::string_view& s, T* v, bool sensitivo) {
+   return (sensitivo ? mapa.emplace(s, v) : mapa.emplace(toupper_str(s), v)).second;
+}
+
+template<typename T>
+T* busca_simbolo(const std::map<std::string, T*>& mapa, const std::string_view& s, bool sensitivo) {
+   auto iter = (sensitivo ? mapa.find(std::string(s.begin( ), s.end( ))) : mapa.find(toupper_str(s)));
+   return (iter != mapa.end( ) ? iter->second : nullptr);
+}
 
 tipo_evaluado evalua(const std::unique_ptr<expresion>& ex, auto&... params) {
    if (auto p = dynamic_cast<const expresion_termino*>(ex.get( )); p != nullptr) {

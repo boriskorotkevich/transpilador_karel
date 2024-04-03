@@ -73,8 +73,7 @@ int main(int argc, char* argv[]){
       std::cerr << arbol << std::endl;
 #endif
 
-      tabla_simbolos tabla = semantico(arbol, tokens.back( ));
-
+      tabla_simbolos tabla = semantico(arbol, tokens.back( ), (*itr_vorigen == "java" || *itr_vorigen == "ruby"));
    }catch(const error& e){
       auto [l, c] = posicion(entrada, e.vista);
       std::cout << "---> ERROR [" << l + 1 << " : " << c + 1 << "] | " << e.mensaje << " " << e.vista << std::endl;
