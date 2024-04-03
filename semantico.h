@@ -12,7 +12,7 @@
 
 struct tabla_simbolos {
    bool sensitivo;
-   std::map<std::string, const declaracion_funcion*> funciones;
+   std::map<std::string, const declaracion_funcion*, std::less<>> funciones;
 
    tabla_simbolos(bool s)
    : sensitivo(s) {
@@ -28,16 +28,11 @@ struct tabla_simbolos {
 };
 
 struct pila_simbolos {
-   bool sensitivo;
    const tabla_simbolos& tabla;
-   std::map<std::string, const token_registrado*> bloque;
-
-   pila_simbolos(const tabla_simbolos& t)
-   : sensitivo(t.sensitivo), tabla(t) {
-   }
+   std::map<std::string, const token_registrado*, std::less<>> bloque;
 
    bool inserta(const std::string_view& s, const token_registrado* p) {
-      return inserta_simbolo(bloque, s, p, sensitivo);
+      return inserta_simbolo(bloque, s, p, tabla.sensitivo);
    }
 
    const declaracion_funcion* busca_funcion(const std::string_view& s) const {
@@ -45,7 +40,7 @@ struct pila_simbolos {
    }
 
    const token_registrado* busca_variable(const std::string_view& s) const {
-      return busca_simbolo(bloque, s, sensitivo);
+      return busca_simbolo(bloque, s, tabla.sensitivo);
    }
 };
 
@@ -152,8 +147,7 @@ void evalua(const sentencia_vacia* s, auto& pila) {
 
 tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo, bool sensitivo) {
    tabla_simbolos tabla(sensitivo);
-
-   for (const auto& funcion : arbol.funciones) {
+   /*for (const auto& funcion : arbol.funciones) {
       if (!tabla.inserta(funcion.nombre.vista, &funcion)) {
          throw error("Nombre de funcion repetida", funcion.nombre.vista);
       }
@@ -166,10 +160,10 @@ tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& 
          pila.inserta(decl->parametro->vista, decl->parametro);
       }
 
-      /*for (const auto& sentencia : decl->cuerpo) {
+      for (const auto& sentencia : decl->cuerpo) {
          evalua(sentencia, pila);
-      }*/
-   }
+      }
+   }*/
 
    if (arbol.mains.empty( )) {
       throw error("El programa no tiene funcion principal", fin_archivo.vista);

@@ -20,14 +20,14 @@ std::string toupper_str(const std::string_view& s) {
    return res;
 }
 
-template<typename T>
-bool inserta_simbolo(std::map<std::string, T*>& mapa, const std::string_view& s, T* v, bool sensitivo) {
+template<typename T, typename C>
+bool inserta_simbolo(std::map<std::string, T*, C>& mapa, const std::string_view& s, T* v, bool sensitivo) {
    return (sensitivo ? mapa.emplace(s, v) : mapa.emplace(toupper_str(s), v)).second;
 }
 
-template<typename T>
-T* busca_simbolo(const std::map<std::string, T*>& mapa, const std::string_view& s, bool sensitivo) {
-   auto iter = (sensitivo ? mapa.find(std::string(s.begin( ), s.end( ))) : mapa.find(toupper_str(s)));
+template<typename T, typename C>
+T* busca_simbolo(const std::map<std::string, T*, C>& mapa, const std::string_view& s, bool sensitivo) {
+   auto iter = (sensitivo ? mapa.find(s) : mapa.find(toupper_str(s)));
    return (iter != mapa.end( ) ? iter->second : nullptr);
 }
 
