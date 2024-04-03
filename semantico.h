@@ -5,13 +5,14 @@
 #include "lexer.h"
 #include "parser.h"
 #include "semantico_aux.h"
-#include <set>
+
 #include <map>
 #include <string_view>
 #include <vector>
 
 struct tabla_simbolos {
    std::map<std::string_view, const declaracion_funcion*> funciones;
+   std::map<std::string_view, const declaracion_prototipo*> prototipos;
 };
 
 struct pila_simbolos {
@@ -47,7 +48,10 @@ tipo_evaluado evalua(const expresion_termino* ex, auto& pila) {
 }
 
 tipo_evaluado evalua(const expresion_binaria* ex, auto& pila) {
-   //...
+   if((evalua(ex->izq, pila) == BOOL && evalua(ex->der, pila) == BOOL) && (ex->op.tipo == AND || ex->op.tipo == OR)){
+      return BOOL;
+   }
+   throw error("Operador binario invalido", ex->vista);
 }
 
 tipo_evaluado evalua(const expresion_prefija* ex, auto& pila) {
@@ -72,7 +76,17 @@ void evalua(const sentencia_comando* s, auto& pila) {
 }
 
 void evalua(const sentencia_if* s, auto& pila) {
-   //...
+   if(evalua(s->condicion, pila) != BOOL){
+      throw error("Tipo incorrecto en condicion", s->vista);
+   }
+
+   for(const auto& sentencia : s->parte_si){
+      evalua(sentencia, pila);
+   }
+
+   for(const auto& sentencia : s->parte_no){
+      evalua(sentencia, pila);
+   }
 }
 
 void evalua(const sentencia_while* s, auto& pila) {
@@ -85,7 +99,13 @@ void evalua(const sentencia_while* s, auto& pila) {
 }
 
 void evalua(const sentencia_iterate* s, auto& pila) {
-   //...
+   if (evalua(s->condicion, pila) != INT) {
+      throw error("Tipo incorrecto en condicion", s->vista);
+   }
+
+   for (const auto& actual : s->cuerpo){
+      evalua(actual, pila);
+   }
 }
 
 void evalua(const sentencia_llamada_usuario* s, auto& pila) {
@@ -115,18 +135,26 @@ void evalua(const sentencia_vacia* s, auto& pila) {
 
 tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo) {
    tabla_simbolos tabla;
-   //... hacer algo con los prototipos
+
+   for (const auto& prototipo : arbol.prototipos){
+      if(!tabla.prototipos.emplace(prototipo.nombre.vista, &prototipo).second){
+         throw error("Declaracion de prototipo repetida", prototipo.nombre.vista);
+      }
+   }
+
    for (const auto& funcion : arbol.funciones) {
       if (!tabla.funciones.emplace(funcion.nombre.vista, &funcion).second) {
          throw error("Nombre de funcion repetida", funcion.nombre.vista);
       }
    }
+
    for (const auto& funcion : arbol.funciones) {
       auto& decl = tabla.funciones.find(funcion.nombre.vista)->second;
       pila_simbolos pila(tabla);
       if (decl->parametro != nullptr) {
          pila.bloque.emplace(decl->parametro->vista, decl->parametro);
       }
+
       for (const auto& sentencia : decl->cuerpo) {
          evalua(sentencia, pila);
       }
@@ -135,7 +163,7 @@ tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& 
    if (arbol.mains.empty( )) {
       throw error("El programa no tiene funcion principal", fin_archivo.vista);
    } else if (arbol.mains.size( ) > 1) {
-      throw error("El programa mas de un funcion principal", fin_archivo.vista);
+      throw error("El programa tiene mas de una funcion principal", fin_archivo.vista);
    } else {
       pila_simbolos pila(tabla);
       for (const auto& sentencia : arbol.mains[0]) {
