@@ -147,7 +147,8 @@ void evalua(const sentencia_vacia* s, auto& pila) {
 
 tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo, bool sensitivo) {
    tabla_simbolos tabla(sensitivo);
-   /*for (const auto& funcion : arbol.funciones) {
+
+   for (const auto& funcion : arbol.funciones) {
       if (!tabla.inserta(funcion.nombre.vista, &funcion)) {
          throw error("Nombre de funcion repetida", funcion.nombre.vista);
       }
@@ -160,10 +161,10 @@ tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& 
          pila.inserta(decl->parametro->vista, decl->parametro);
       }
 
-      for (const auto& sentencia : decl->cuerpo) {
+      for (const auto& sentencia : *decl->cuerpo) {
          evalua(sentencia, pila);
       }
-   }*/
+   }
 
    if (arbol.mains.empty( )) {
       throw error("El programa no tiene funcion principal", fin_archivo.vista);
