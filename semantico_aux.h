@@ -16,18 +16,18 @@ enum tipo_evaluado {
 
 std::string toupper_str(const std::string_view& s) {
    std::string res;
-   std::transform(res.begin( ), res.end( ), std::back_inserter(res), ::toupper);
+   std::transform(s.begin( ), s.end( ), std::back_inserter(res), ::toupper);
    return res;
 }
 
 template<typename T, typename C>
-bool inserta_simbolo(std::map<std::string, T*, C>& mapa, const std::string_view& s, T* v, bool sensitivo) {
-   return (sensitivo ? mapa.emplace(s, v) : mapa.emplace(toupper_str(s), v)).second;
+bool inserta_simbolo(std::map<std::string, T*, C>& mapa, const std::string_view& s, T* v, bool sensible) {
+   return (sensible ? mapa.emplace(s, v) : mapa.emplace(toupper_str(s), v)).second;
 }
 
 template<typename T, typename C>
-T* busca_simbolo(const std::map<std::string, T*, C>& mapa, const std::string_view& s, bool sensitivo) {
-   auto iter = (sensitivo ? mapa.find(s) : mapa.find(toupper_str(s)));
+T* busca_simbolo(const std::map<std::string, T*, C>& mapa, const std::string_view& s, bool sensible) {
+   auto iter = (sensible ? mapa.find(s) : mapa.find(toupper_str(s)));
    return (iter != mapa.end( ) ? iter->second : nullptr);
 }
 

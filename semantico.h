@@ -11,19 +11,19 @@
 #include <vector>
 
 struct tabla_simbolos {
-   bool sensitivo;
+   bool sensible;
    std::map<std::string, const declaracion_funcion*, std::less<>> funciones;
 
    tabla_simbolos(bool s)
-   : sensitivo(s) {
+   : sensible(s) {
    }
 
    bool inserta(const std::string_view& s, const declaracion_funcion* d) {
-      return inserta_simbolo(funciones, s, d, sensitivo);
+      return inserta_simbolo(funciones, s, d, sensible);
    }
 
    const declaracion_funcion* busca(const std::string_view& s) const {
-      return busca_simbolo(funciones, s, sensitivo);
+      return busca_simbolo(funciones, s, sensible);
    }
 };
 
@@ -32,7 +32,7 @@ struct pila_simbolos {
    std::map<std::string, const token_registrado*, std::less<>> bloque;
 
    bool inserta(const std::string_view& s, const token_registrado* p) {
-      return inserta_simbolo(bloque, s, p, tabla.sensitivo);
+      return inserta_simbolo(bloque, s, p, tabla.sensible);
    }
 
    const declaracion_funcion* busca_funcion(const std::string_view& s) const {
@@ -40,7 +40,7 @@ struct pila_simbolos {
    }
 
    const token_registrado* busca_variable(const std::string_view& s) const {
-      return busca_simbolo(bloque, s, tabla.sensitivo);
+      return busca_simbolo(bloque, s, tabla.sensible);
    }
 };
 
@@ -145,8 +145,8 @@ void evalua(const sentencia_vacia* s, auto& pila) {
    return;
 }
 
-tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo, bool sensitivo) {
-   tabla_simbolos tabla(sensitivo);
+tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& fin_archivo, bool sensible) {
+   tabla_simbolos tabla(sensible);
 
    for (const auto& funcion : arbol.funciones) {
       if (!tabla.inserta(funcion.nombre.vista, &funcion)) {
