@@ -1,0 +1,16 @@
+class program {
+   void n(n){
+      f(n);
+   }
+
+   void g(){
+      f();
+   }
+
+   void f(n){
+   }
+
+   program(){
+      
+   }
+}

@@ -26,6 +26,12 @@ bool inserta_simbolo(std::map<std::string, T*, C>& mapa, const std::string_view&
 }
 
 template<typename T, typename C>
+void elimina_simbolo(std::map<std::string, T*, C>& mapa, const std::string_view& s, bool sensible) {
+   auto iter = (sensible ? mapa.find(s) : mapa.find(toupper_str(s)));
+   mapa.erase(iter);
+}
+
+template<typename T, typename C>
 T* busca_simbolo(const std::map<std::string, T*, C>& mapa, const std::string_view& s, bool sensible) {
    auto iter = (sensible ? mapa.find(s) : mapa.find(toupper_str(s)));
    return (iter != mapa.end( ) ? iter->second : nullptr);

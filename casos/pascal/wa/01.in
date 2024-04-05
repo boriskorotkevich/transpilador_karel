@@ -1,0 +1,14 @@
+iniciar-programa
+    define-nueva-instruccion retrocede como inicio
+        intenta;
+    fin;
+
+    define-nueva-instruccion intenta como inicio
+
+    fin;
+
+    inicia-ejecucion
+        { TODO poner codigo aquí }
+        apagate;
+    termina-ejecucion
+finalizar-programa

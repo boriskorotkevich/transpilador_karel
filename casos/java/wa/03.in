@@ -1,0 +1,10 @@
+class program{
+   define f(n){
+      while (n && (frontIsClear() && rightIsBlocked || (nextToABeeper()))){
+         move();
+      }
+   }
+
+   program(){
+   }
+}

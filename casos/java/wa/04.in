@@ -1,0 +1,5 @@
+class program{
+   void f(){
+      move();
+   }
+}

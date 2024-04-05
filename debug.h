@@ -67,10 +67,10 @@ std::ostream& operator<<(std::ostream& os, const std::unique_ptr<sentencia>& s){
 std::ostream& operator<<(std::ostream& os, const declaracion_funcion& decl_fun){
    os << "void " << decl_fun.nombre.vista << "(";
    if (decl_fun.parametro != nullptr) {
-      os << decl_fun.parametro->vista;
+      os << decl_fun.parametro->vista << ")";
    }
    if (decl_fun.cuerpo != nullptr) {
-      os << "){" << std::endl << *decl_fun.cuerpo << "}" << std::endl;
+      os << "{" << std::endl << *decl_fun.cuerpo << "}" << std::endl;
    }
    return os;
 }

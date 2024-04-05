@@ -1,0 +1,25 @@
+class program{
+   void f(n){
+      if(frontIsBlocked()){
+         while(frontIsBlocked){
+            turnleft();
+         }
+         iterate(succ(n)){
+            move();
+         }
+         {
+            move();
+         }
+      }
+
+      iterate(m){
+         move();
+         ;
+      }
+      return();
+   }
+
+   program(){{
+      f(3);
+   }}
+}

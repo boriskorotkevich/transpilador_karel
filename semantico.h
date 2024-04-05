@@ -21,6 +21,10 @@ struct tabla_simbolos {
    bool inserta(const std::string_view& s, const declaracion_funcion* d) {
       return inserta_simbolo(funciones, s, d, sensible);
    }
+   
+   void elimina(const std::string_view& s){
+      elimina_simbolo(funciones, s, sensible);
+   }
 
    const declaracion_funcion* busca(const std::string_view& s) const {
       return busca_simbolo(funciones, s, sensible);
@@ -60,8 +64,12 @@ tipo_evaluado evalua(const expresion_termino* ex, auto& pila) {
 }
 
 tipo_evaluado evalua(const expresion_binaria* ex, auto& pila) {
-   if((evalua(ex->izq, pila) == BOOL && evalua(ex->der, pila) == BOOL) && (ex->op.tipo == AND || ex->op.tipo == OR)){
-      return BOOL;
+   if(evalua(ex->izq, pila) == BOOL && evalua(ex->der, pila) == BOOL){
+      if(ex->op.tipo == AND || ex->op.tipo == OR){
+         return BOOL;
+      }
+   }else{
+      throw error("Los operandos deben ser de tipo booleano", ex->vista);
    }
    throw error("Operador binario invalido", ex->vista);
 }
@@ -121,12 +129,8 @@ void evalua(const sentencia_iterate* s, auto& pila) {
 }
 
 void evalua(const sentencia_llamada_usuario* s, auto& pila) {
-   if (pila.busca_variable(s->funcion.vista) != nullptr) {
-      throw error("El identificador no denota una funcion", s->vista);
-   }
-
    auto decl = pila.busca_funcion(s->funcion.vista);
-   if (decl == nullptr) {
+   if (decl == nullptr || decl->cuerpo == nullptr) {
       throw error("Llamada a funcion no declarada", s->vista);
    } else if ((decl->parametro == nullptr) != (s->parametro == nullptr)) {
       throw error("Numero de argumentos incorrecto", s->vista);
@@ -149,20 +153,41 @@ tabla_simbolos semantico(const arbol_sintactico& arbol, const token_registrado& 
    tabla_simbolos tabla(sensible);
 
    for (const auto& funcion : arbol.funciones) {
-      if (!tabla.inserta(funcion.nombre.vista, &funcion)) {
-         throw error("Nombre de funcion repetida", funcion.nombre.vista);
+      if(!tabla.inserta(funcion.nombre.vista, &funcion)){
+         auto decl_funcion = tabla.busca(funcion.nombre.vista);
+         if(decl_funcion->cuerpo == nullptr && funcion.cuerpo != nullptr){
+            if(!((decl_funcion->parametro == nullptr) ^ (funcion.parametro == nullptr))){
+               tabla.elimina(funcion.nombre.vista);
+               tabla.inserta(funcion.nombre.vista, &funcion);
+            }else{
+               throw error("El numero de parametros del prototipo y de la funcion no coincide", funcion.nombre.vista);
+            }
+         }else{
+            std::string msg_error;
+            if(decl_funcion->cuerpo != nullptr){
+               msg_error = "El prorotipo debe declararse antes que la funcion";
+            }else if(decl_funcion->cuerpo == nullptr && funcion.cuerpo == nullptr){
+               msg_error = "Nombre de prototipo repetido";
+            }else{
+               msg_error = "Nombre de funcion repetido";
+            }
+            throw error(msg_error, funcion.nombre.vista);
+         }
       }
    }
 
    for (const auto& funcion : arbol.funciones) {
       auto decl = tabla.busca(funcion.nombre.vista);
-      pila_simbolos pila(tabla);
-      if (decl->parametro != nullptr) {
-         pila.inserta(decl->parametro->vista, decl->parametro);
-      }
+      if(decl != nullptr && funcion.cuerpo != nullptr){
+         pila_simbolos pila(tabla);
 
-      for (const auto& sentencia : *decl->cuerpo) {
-         evalua(sentencia, pila);
+         if (decl->parametro != nullptr) {
+            pila.inserta(decl->parametro->vista, decl->parametro);
+         }
+
+         for (const auto& sentencia : *decl->cuerpo) {
+            evalua(sentencia, pila);
+         }
       }
    }
 

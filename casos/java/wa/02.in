@@ -1,0 +1,15 @@
+class program{
+   void f(){
+   }
+
+   void g(){
+   }
+
+   program (){
+      f();
+   }
+
+   program (){
+      g();
+   }
+}

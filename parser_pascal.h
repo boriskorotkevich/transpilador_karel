@@ -18,12 +18,6 @@ private:
       return std::move(res);
    }
 
-   std::vector<std::unique_ptr<sentencia>> one_stmt(const token_registrado*& p) const {
-      std::vector<std::unique_ptr<sentencia>> res;
-      res.push_back(stmt(p));
-      return std::move(res);
-   }
-
    void espera_fin_stmt(const token_registrado*& p, const std::vector<tipo_token>& v) const {
       int cont = 0;
       for(const auto& token_no_esperado : v){
@@ -38,15 +32,14 @@ private:
    std::unique_ptr<sentencia> stmt(const token_registrado*& p) const {
       control_vista cv(p);
 
-      auto cuerpo_stmt = [&](const token_registrado*& p, const std::vector<tipo_token>& v)
-         -> std::vector<std::unique_ptr<sentencia>> {
+      auto cuerpo_stmt = [&](const token_registrado*& p, const std::vector<tipo_token>& v) -> std::vector<std::unique_ptr<sentencia>> {
             std::vector<std::unique_ptr<sentencia>> cuerpo;
             if(p->tipo == INICIO){
                cuerpo = lista_stmt(++p);
                espera(p, FIN);
                espera_fin_stmt(p, v);
             }else{
-               cuerpo = one_stmt(p);
+               cuerpo.push_back(stmt(p));
             }
          return std::move(cuerpo);
       };
