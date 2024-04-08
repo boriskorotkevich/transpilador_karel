@@ -108,11 +108,11 @@ enum tipo_token{
 };
 
 class lexer_base {
-   std::map<std::string, tipo_token> palabras, simbolos;
+   std::map<std::string_view, tipo_token> palabras, simbolos;
    int max_tam_simbolo;
 
 public:
-   lexer_base(std::map<std::string, tipo_token>&& p, std::map<std::string, tipo_token>&& s)
+   lexer_base(std::map<std::string_view, tipo_token>&& p, std::map<std::string_view, tipo_token>&& s)
    : palabras(std::move(p)), simbolos(std::move(s)), max_tam_simbolo(0) {
       for (const auto& [cad, token] : simbolos) {
          max_tam_simbolo = std::max(max_tam_simbolo, int(cad.size( )));
