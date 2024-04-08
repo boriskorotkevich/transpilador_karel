@@ -11,6 +11,10 @@
 #include "parser_pascal.h"
 #include "parser_ruby.h"
 #include "semantico.h"
+#include "codegen.h"
+#include "codegen_java.h"
+#include "codegen_pascal.h"
+#include "codegen_ruby.h"
 
 #include <algorithm>
 #include <fstream>
@@ -20,7 +24,7 @@
 
 int main(int argc, char* argv[]){
    if(argc != 4){
-      std::cout << "Uso: " << argv[0] << " ruta_archivo version_origen version_destino\n";
+      std::cout << "Uso: " << argv[0] << " ruta_entrada version_origen version_destino [ruta_salida]\n";
       return 0;
    }
 
@@ -35,7 +39,11 @@ int main(int argc, char* argv[]){
          return 0;
       }
 
-      std::fstream f(argv[1], std::ios::in);
+      std::ifstream f(argv[1]);
+      if (!f.is_open( )) {
+         std::cout << "---> ERROR: No se pudo abrir el archivo de entrada" << std::endl;
+         return 0;
+      }
       std::stringstream ss;
       f >> ss.rdbuf();
       entrada = std::move(ss).str();
@@ -74,6 +82,32 @@ int main(int argc, char* argv[]){
 #endif
 
       tabla_simbolos tabla = semantico(arbol, tokens.back( ), (*itr_vorigen == "java" || *itr_vorigen == "ruby"));
+#ifdef DEBUG
+      //...
+#endif
+
+      std::string salida;
+      if(*itr_vdestino == "pascal"){
+         codegen_pascal pascal;
+         salida = codegen(pascal, arbol, tabla);
+      }else if(*itr_vdestino == "java"){
+         codegen_java java;
+         salida = codegen(java, arbol, tabla);
+      }else{
+         codegen_ruby ruby;
+         salida = codegen(ruby, arbol, tabla);
+      }
+
+      if (argc > 4) {
+         std::ofstream f(argv[4]);
+         if (!f.is_open( )) {
+            std::cout << "---> ERROR: No se pudo abrir el archivo de salida" << std::endl;
+            return 0;
+         }
+         f << salida;
+      } else {
+         std::cout << salida;
+      }
    }catch(const error& e){
       auto [l, c] = posicion(entrada, e.vista);
       std::cout << "---> ERROR [" << l + 1 << " : " << c + 1 << "] | " << e.mensaje << " " << e.vista << std::endl;
