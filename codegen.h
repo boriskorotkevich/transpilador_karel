@@ -2,7 +2,8 @@
 #define CODEGEN_H
 
 #include "codegen_aux.h"
-#include <ios>
+#include "parser.h"
+#include "semantico.h"
 #include <sstream>
 
 struct codegen_base {
