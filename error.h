@@ -1,7 +1,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include "error.h"
 #include <string>
 #include <string_view>
 #include <utility>
