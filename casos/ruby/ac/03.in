@@ -1,0 +1,57 @@
+def regresa(n)
+   gira-izquierda
+   gira-izquierda
+   mientras frente-libre
+      avanza
+   fin
+   gira-izquierda
+   gira-izquierda
+fin
+
+mientras no-orientado-al-este
+   gira-izquierda
+fin
+
+si frente-libre
+   avanza
+   si frente-libre
+      avanza
+      deja-zumbador
+   fin
+fin
+
+mientras frente-libre
+   2 veces
+      si frente-libre
+         avanza
+      fin
+   fin
+fin
+
+regresa(0)
+
+3 veces
+   si frente-libre
+      avanza
+   fin
+fin
+
+si frente-libre
+   avanza
+   deja-zumbador
+fin
+
+mientras frente-libre
+   sucede(4) veces
+      si frente-libre
+         avanza
+      fin
+   fin
+
+   si frente-libre
+      avanza
+      deja-zumbador
+   fin
+fin
+regresa(0)
+apagate

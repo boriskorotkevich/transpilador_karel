@@ -1,0 +1,10 @@
+iniciar-programa
+  define-prototipo-instruccion gira(n);
+  define-prototipo-instruccion gira;
+
+  define-nueva-instruccion GIRA(n) como inicio
+  fin;
+
+  inicia-ejecucion
+  termina-ejecucion
+finalizar-programa

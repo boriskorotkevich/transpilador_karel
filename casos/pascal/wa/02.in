@@ -1,0 +1,7 @@
+iniciar-programa
+   define-prototipo-instruccion intenta;
+
+   inicia-ejecucion
+      intenta;
+   termina-ejecucion
+finalizar-programa

@@ -1,0 +1,7 @@
+iniciar-programa
+   inicia-ejecucion
+   si orientado-al-norte entonces
+      mientras ningun-zumbador-en-la-mochila y Frente-libre hacer
+         avanza;
+   termina-ejecucion
+finalizar-programa

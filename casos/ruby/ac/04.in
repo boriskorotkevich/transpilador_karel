@@ -1,0 +1,37 @@
+def turningright(n)
+   gira-izquierda
+   gira-izquierda
+   gira-izquierda
+fin
+
+turningright(0)
+mientras frente-libre o izquierda-libre
+   si no-junto-a-zumbador
+      deja-zumbador
+   fin
+   si frente-libre
+      avanza
+   sino
+      si frente-libre
+         gira-izquierda
+         avanza
+         gira-izquierda
+         mientras frente-libre
+            avanza
+         fin
+         halfturn(0)
+      sino
+         deja-zumbador
+         apagate
+      fin
+   fin
+fin
+
+def halfturn(n)
+   gira-izquierda
+   gira-izquierda
+fin
+
+si no-junto-a-zumbador
+   deja-zumbador
+fin

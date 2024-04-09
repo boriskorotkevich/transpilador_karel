@@ -36,20 +36,26 @@ private:
          auto comando = p;
          espera_seq(++p, {PARENTESIS_IZQ, PARENTESIS_DER, PUNTO_COMA});
          return std::make_unique<sentencia_comando>(cv, *comando);
-      } else if (p->tipo == IF && (p + 1)->tipo == PARENTESIS_IZQ) {
-         auto ex = expr(++p);
+      } else if (p->tipo == IF){
+         espera(++p, PARENTESIS_IZQ);
+         auto ex = expr(p);
+         espera(p, PARENTESIS_DER);
          auto parte_si = cuerpo_stmt(p);
          auto parte_no = decltype(parte_si)( );
          if (p->tipo == ELSE) {
             parte_no = cuerpo_stmt(++p);
          }
          return std::make_unique<sentencia_if>(cv, std::move(ex), std::move(parte_si), std::move(parte_no));
-      } else if (p->tipo == WHILE && (p + 1)->tipo == PARENTESIS_IZQ) {
-         auto ex = expr(++p);
+      } else if (p->tipo == WHILE){ 
+         espera(++p, PARENTESIS_IZQ);
+         auto ex = expr(p);
+         espera(p, PARENTESIS_DER);
          auto cuerpo = cuerpo_stmt(p);
          return std::make_unique<sentencia_while>(cv, std::move(ex), std::move(cuerpo));
-      } else if(p->tipo == ITERATE && (p + 1)->tipo == PARENTESIS_IZQ){
-         auto ex = expr(++p);
+      } else if(p->tipo == ITERATE){ 
+         espera(++p, PARENTESIS_IZQ);
+         auto ex = expr(p);
+         espera(p, PARENTESIS_DER);
          auto cuerpo = cuerpo_stmt(p);
          return std::make_unique<sentencia_iterate>(cv, std::move(ex), std::move(cuerpo));
       } else if (p->tipo == IDENTIFICADOR) {

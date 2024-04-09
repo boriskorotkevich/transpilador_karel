@@ -1,0 +1,50 @@
+def girar(n)
+   n veces
+      gira-izquierda
+   fin
+fin
+
+def intentar(n)
+   si no si-es-cero(n)
+      deja-zumbador
+      si frente-libre
+         avanza
+         intentar(precede(n))
+         girar(2)
+         avanza
+         girar(2)
+      sino
+         gira-izquierda
+         si frente-libre
+            avanza
+            intentar(precede(n))
+            girar(2)
+            avanza
+            gira-izquierda
+         sino
+            girar(2)
+            avanza
+            intentar(precede(n))
+            girar(2)
+            avanza
+            girar(3)
+         fin
+      fin
+      coge-zumbador
+   sino
+      si junto-a-zumbador
+         apagate
+      fin
+   fin
+fin
+
+def incrementar(n)
+   4 veces
+      gira-izquierda
+      intentar(n)
+   fin
+   incrementar(sucede(n))
+fin
+
+coge-zumbador
+incrementar(1)

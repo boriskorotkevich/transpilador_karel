@@ -3,6 +3,8 @@ iniciar-programa
         intenta;
     fin;
 
+    define-prototipo-instruccion retrocede;
+
     define-nueva-instruccion intenta como inicio
 
     fin;
