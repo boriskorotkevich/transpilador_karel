@@ -70,6 +70,16 @@ struct lexer_ruby : lexer_base{
       return false;
    }
 
+   bool es_identificador(const char*& p) const{
+      if(std::isalpha(*p)){
+         do{
+            ++p;
+         }while(std::isalnum(*p) || *p == '-');
+         return true;
+      }
+      return false;
+   }
+
    bool es_comentario_bloque(const char*& p) const{
       return false;
    }

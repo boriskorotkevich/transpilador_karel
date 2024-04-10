@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 
 #include "debug.h"
 #include "error.h"
@@ -89,13 +89,13 @@ int main(int argc, char* argv[]){
       std::string salida;
       if(*itr_vdestino == "pascal"){
          codegen_pascal pascal;
-         salida = codegen(pascal, arbol, tabla);
+         salida = codegen(*itr_vorigen, pascal, arbol, tabla);
       }else if(*itr_vdestino == "java"){
          codegen_java java;
-         salida = codegen(java, arbol, tabla);
+         salida = codegen(*itr_vorigen, java, arbol, tabla);
       }else{
          codegen_ruby ruby;
-         salida = codegen(ruby, arbol, tabla);
+         salida = codegen(*itr_vorigen, ruby, arbol, tabla);
       }
 
       if (argc > 4) {

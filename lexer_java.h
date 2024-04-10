@@ -89,6 +89,16 @@ struct lexer_java : lexer_base{
       return false;
    }
 
+   bool es_identificador(const char*& p) const{
+      if(std::isalpha(*p)){
+         do{
+            ++p;
+         }while(std::isalnum(*p) || *p == '_');
+         return true;
+      }
+      return false;
+   }
+
    void salta_espacios(const char*& p) const{
       while(std::isspace(*p)){
          ++p;

@@ -123,22 +123,13 @@ public:
    virtual bool es_comentario_linea(const char*&) const = 0;
    virtual bool es_comentario_bloque(const char*&) const = 0;
    virtual void salta_espacios(const char*&) const = 0;
+   virtual bool es_identificador(const char*& p) const = 0;
 
    bool es_literal_entera(const char*& p) const{
       if(isdigit(*p)){
          do{
             ++p;
          }while(std::isdigit(*p));
-         return true;
-      }
-      return false;
-   }
-
-   bool es_identificador(const char*& p) const{
-      if(std::isalpha(*p) || *p == '_'){
-         do{
-            ++p;
-         }while(std::isalnum(*p) || *p == '_' || *p == '-');
          return true;
       }
       return false;

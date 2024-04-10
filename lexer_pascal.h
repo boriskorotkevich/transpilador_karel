@@ -95,6 +95,16 @@ struct lexer_pascal : lexer_base{
       return tipo_comentario_bloque({ "(*", "*)" }) || tipo_comentario_bloque({ "{", "}" });
    }
 
+   bool es_identificador(const char*& p) const{
+      if(std::isalpha(*p) || *p == '_'){
+         do{
+            ++p;
+         }while(std::isalnum(*p) || *p == '_' || *p == '-');
+         return true;
+      }
+      return false;
+   }
+
    void salta_espacios(const char*& p) const{
       while(std::isspace(*p)){
          ++p;
