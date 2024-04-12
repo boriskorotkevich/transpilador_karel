@@ -5,12 +5,11 @@
 
 struct codegen_pascal : codegen_base {
    using codegen_base::genera;
-
    mutable int nivel_ind = 1;
 
    codegen_pascal()
    : codegen_base(
-      4, 
+      4,
    {
       {SAL_INS, "sal-de-instruccion"},
       {RETURN, "sal-de-instruccion"},
@@ -48,12 +47,12 @@ struct codegen_pascal : codegen_base {
       return;
    }
 
-   void genera(const expresion_termino* ex, std::ostream& os, const std::string& origen) const {
+   void genera(const expresion_termino* ex, std::ostream& os, const std::string_view& origen) const {
       auto itr = palabras.find(ex->token.tipo);
       os << mejora_id(ex->token, palabras, origen);
    }
 
-   void genera(const expresion_binaria* ex, std::ostream& os, const std::string& origen) const {
+   void genera(const expresion_binaria* ex, std::ostream& os, const std::string_view& origen) const {
       os << "( ";
       genera(ex->izq, os, origen);
       auto itr = palabras.find(ex->op.tipo);
@@ -62,28 +61,28 @@ struct codegen_pascal : codegen_base {
       os << " )";
    }
 
-   void genera(const expresion_prefija* ex, std::ostream& os, const std::string& origen) const {
+   void genera(const expresion_prefija* ex, std::ostream& os, const std::string_view& origen) const {
       auto itr = palabras.find(ex->op.tipo);
       os << itr->second << "( ";
       genera(ex->ex, os, origen);
       os << " )";
    }
 
-   void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string& origen) const {
+   void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string_view& origen) const {
       auto itr = palabras.find(ex->funcion.tipo);
       os << itr->second << "(";
       genera(ex->parametro, os, origen);
       os << ")";
    }
 
-   void genera(const sentencia_comando* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_comando* s, std::ostream& os, const std::string_view& origen) const {
       auto itr = palabras.find(s->comando.tipo);
       os << printws(nivel_ind * tab) << itr->second << ";\n";
    }
 
-   void genera(const sentencia_if* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_if* s, std::ostream& os, const std::string_view& origen) const {
       os << printws(nivel_ind++ * tab) << "si ";
-      genera(s->condicion, os, origen); 
+      genera(s->condicion, os, origen);
       os << " entonces inicio\n";
       genera(s->parte_si, os, origen);
       os << printws(--nivel_ind * tab) << "fin";
@@ -91,13 +90,12 @@ struct codegen_pascal : codegen_base {
          os << " sino inicio\n";
          ++nivel_ind;
          genera(s->parte_no, os, origen);
-         os << printws(--nivel_ind * tab) << "fin;\n";
-         return;
+         os << printws(--nivel_ind * tab) << "fin";
       }
       os << ";\n";
    }
 
-   void genera(const sentencia_while* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_while* s, std::ostream& os, const std::string_view& origen) const {
       os << printws(nivel_ind++ * tab) << "mientras ";
       genera(s->condicion, os, origen);
       os << " hacer inicio\n";
@@ -105,7 +103,7 @@ struct codegen_pascal : codegen_base {
       os << printws(--nivel_ind * tab) << "fin;\n";
    }
 
-   void genera(const sentencia_iterate* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_iterate* s, std::ostream& os, const std::string_view& origen) const {
       os << printws(nivel_ind++ * tab) << "repetir ";
       genera(s->condicion, os, origen);
       os << " veces inicio\n";
@@ -113,8 +111,8 @@ struct codegen_pascal : codegen_base {
       os << printws(--nivel_ind * tab) << "fin;\n";
    }
 
-   void genera(const sentencia_llamada_usuario* s, std::ostream& os, const std::string& origen) const {
-      os << printws(nivel_ind * tab) << mejora_id(s->funcion, palabras, origen); 
+   void genera(const sentencia_llamada_usuario* s, std::ostream& os, const std::string_view& origen) const {
+      os << printws(nivel_ind * tab) << mejora_id(s->funcion, palabras, origen);
       if(s->parametro != nullptr){
          os << "(";
          genera(s->parametro, os, origen);
@@ -123,32 +121,28 @@ struct codegen_pascal : codegen_base {
       os << ";\n";
    }
 
-   void genera(const sentencia_bloque* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_bloque* s, std::ostream& os, const std::string_view& origen) const {
       if(!s->cuerpo.empty()){
          genera(s->cuerpo, os, origen);
       }
    }
 
-   void genera(const sentencia_vacia* s, std::ostream& os, const std::string& origen) const {
+   void genera(const sentencia_vacia* s, std::ostream& os, const std::string_view& origen) const {
       os << printws(nivel_ind * tab) << ";\n";
    }
 
-   void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const std::string& origen) const {
+   void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const std::string_view& origen) const {
       os << "iniciar-programa\n";
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
             os << printws(nivel_ind++ * tab) << "define-nueva-instruccion " << mejora_id(funcion.nombre, palabras, origen) << (funcion.parametro ? "(" + mejora_id(*(funcion.parametro), palabras, origen) + ")": "") << " como inicio\n";
-            for (const auto& sentencia : *funcion.cuerpo) {
-               genera(sentencia, os, origen);
-            }
+            genera(*funcion.cuerpo, os, origen);
             os << printws(--nivel_ind * tab) << "fin;\n\n";
          }
       }
 
       os << printws(nivel_ind++ * tab) << "inicia-ejecucion\n";
-      for (const auto& sentencia : arbol.mains[0]){
-         genera(sentencia, os, origen);
-      }
+      genera(arbol.mains[0], os, origen);
       os << printws(--nivel_ind * tab) << "termina-ejecucion\n";
       os << "finalizar-programa\n";
    }

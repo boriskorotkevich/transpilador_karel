@@ -6,25 +6,21 @@
 #include "parser.h"
 
 std::string printws(int ws){
-   std::string ans{};
-   while(ws--){
-      ans += " ";
-   }
-   return ans;
+   return std::string(ws, ' ');
 }
 
-std::string mejora_id(const token_registrado& tg, const std::map<tipo_token, std::string_view>& palabras, const std::string& origen){
-   std::string cp = std::string(tg.vista);
+std::string mejora_id(const token_registrado& t, const std::map<tipo_token, std::string_view>& palabras, const std::string_view& origen){
+   std::string cp = std::string(t.vista);
    std::replace_if(cp.begin(), cp.end(), [&](const char& c){
-         return (c == '_');
-      }, 'X');
-   
-   if(tg.tipo == IDENTIFICADOR){
+      return (c == '_');
+   }, 'X');
+
+   if(t.tipo == IDENTIFICADOR){
       return (origen == "pascal" ? toupper_str(cp) : cp + "XDD");
-   }else if(tg.tipo == LITERAL_ENTERA){
+   }else if(t.tipo == LITERAL_ENTERA){
       return cp;
    }else{
-      return std::string{palabras.find(tg.tipo)->second};
+      return std::string{palabras.find(t.tipo)->second};
    }
 }
 
