@@ -89,13 +89,13 @@ int main(int argc, char* argv[]){
       std::string salida;
       if(*itr_vdestino == "pascal"){
          codegen_pascal pascal;
-         salida = codegen(*itr_vorigen, pascal, arbol, tabla);
+         salida = codegen(pascal, arbol, tabla, *itr_vorigen);
       }else if(*itr_vdestino == "java"){
          codegen_java java;
-         salida = codegen(*itr_vorigen, java, arbol, tabla);
+         salida = codegen(java, arbol, tabla, *itr_vorigen);
       }else{
          codegen_ruby ruby;
-         salida = codegen(*itr_vorigen, ruby, arbol, tabla);
+         salida = codegen(ruby, arbol, tabla, *itr_vorigen);
       }
 
       if (argc > 4) {

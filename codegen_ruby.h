@@ -5,7 +5,7 @@
 
 struct codegen_ruby : codegen_base {
    using codegen_base::genera;
-   mutable int nivel_ind = 0;
+   mutable int nivel_ind = 1;
 
    codegen_ruby()
    : codegen_base(
@@ -13,7 +13,7 @@ struct codegen_ruby : codegen_base {
    {
       {APAGATE, "apagate"},
       {SAL_INS, "sal-de-instruccion"},
-      {RETURN, "sal-de-instruccion"},
+      {RETURN, "return"},
       {GIRA_IZQ, "gira-izquierda"},
       {AVANZA, "avanza"},
       {COGE_ZUM, "coge-zumbador"},
@@ -46,95 +46,98 @@ struct codegen_ruby : codegen_base {
       return;
    }
 
-   void genera(const std::string& org, const expresion_termino* ex, std::ostream& os) const {
-      os << mejora_id(org, ex->token, palabras);
+   void genera(const expresion_termino* ex, std::ostream& os, const std::string& origen) const {
+      os << mejora_id(ex->token, palabras, origen);
    }
 
-   void genera(const std::string& org, const expresion_binaria* ex, std::ostream& os) const {
+   void genera(const expresion_binaria* ex, std::ostream& os, const std::string& origen) const {
       os << "( ";
-      genera(org, ex->izq, os);
+      genera(ex->izq, os, origen);
       os << " " << palabras.find(ex->op.tipo)->second << " ";
-      genera(org, ex->der, os);
+      genera(ex->der, os, origen);
       os << " )";
    }
 
-   void genera(const std::string& org, const expresion_prefija* ex, std::ostream& os) const {
+   void genera(const expresion_prefija* ex, std::ostream& os, const std::string& origen) const {
       os << palabras.find(ex->op.tipo)->second << "( ";
-      genera(org, ex->ex, os);
+      genera(ex->ex, os, origen);
       os << " )";
    }
 
-   void genera(const std::string& org, const expresion_llamada_nativa* ex, std::ostream& os) const {
+   void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string& origen) const {
       os << palabras.find(ex->funcion.tipo)->second << "(";
-      genera(org, ex->parametro, os);
+      genera(ex->parametro, os, origen);
       os << ")";
    }
 
-   void genera(const std::string& org, const sentencia_comando* s, std::ostream& os) const {
+   void genera(const sentencia_comando* s, std::ostream& os, const std::string& origen) const {
       auto itr = palabras.find(s->comando.tipo);
       os << printws(nivel_ind * tab) << palabras.find(s->comando.tipo)->second << "\n";
    }
 
-   void genera(const std::string& org, const sentencia_if* s, std::ostream& os) const {
+   void genera(const sentencia_if* s, std::ostream& os, const std::string& origen) const {
       os << printws(nivel_ind++ * tab) << "si ";
-      genera(org, s->condicion, os); 
+      genera(s->condicion, os, origen); 
       os << "\n";
-      genera(org, s->parte_si, os);
+      genera(s->parte_si, os, origen);
       if(!s->parte_no.empty()){
          os << printws(--nivel_ind * tab) << "sino\n";
          ++nivel_ind;
-         genera(org, s->parte_no, os);
+         genera(s->parte_no, os, origen);
       }
-      os << printws(--nivel_ind * tab) << "fin\n";
+      os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const std::string& org, const sentencia_while* s, std::ostream& os) const {
+   void genera(const sentencia_while* s, std::ostream& os, const std::string& origen) const {
       os << printws(nivel_ind++ * tab) << "mientras ";
-      genera(org, s->condicion, os);
+      genera(s->condicion, os, origen);
       os << "\n";
-      genera(org, s->cuerpo, os);
-      os << printws(--nivel_ind * tab) << "fin\n";
+      genera(s->cuerpo, os, origen);
+      os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const std::string& org, const sentencia_iterate* s, std::ostream& os) const {
+   void genera(const sentencia_iterate* s, std::ostream& os, const std::string& origen) const {
       os << printws(nivel_ind++ * tab);
-      genera(org, s->condicion, os);
+      genera(s->condicion, os, origen);
       os << " veces\n";
-      genera(org, s->cuerpo, os);
-      os << printws(--nivel_ind * tab) << "fin\n";
+      genera(s->cuerpo, os, origen);
+      os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const std::string& org, const sentencia_llamada_usuario* s, std::ostream& os) const {
-      os << printws(nivel_ind * tab) << mejora_id(org, s->funcion, palabras) << "(";
+   void genera(const sentencia_llamada_usuario* s, std::ostream& os, const std::string& origen) const {
+      os << printws(nivel_ind * tab) << mejora_id(s->funcion, palabras, origen) << "(";
       if(s->parametro != nullptr){
-         genera(org, s->parametro, os);
+         genera(s->parametro, os, origen);
       }else{
          os << "0";
       }
       os << ")\n";
    }
 
-   void genera(const std::string& org, const sentencia_bloque* s, std::ostream& os) const {
-      return;
+   void genera(const sentencia_bloque* s, std::ostream& os, const std::string& origen) const {
+      if(s->cuerpo.empty()){
+         return;
+      }
+      genera(s->cuerpo, os, origen);
    }
 
-   void genera(const std::string& org, const sentencia_vacia* s, std::ostream& os) const {
-      return;
+   void genera(const sentencia_vacia* s, std::ostream& os, const std::string& origen) const {
+      os << printws(nivel_ind * tab) << ";\n";
    }
 
-   void genera(const std::string& org, const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os) const {
+   void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const std::string& origen) const {
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
-            os << printws(nivel_ind++ * tab) << "def " << mejora_id(org, funcion.nombre, palabras) << "(" << (funcion.parametro ? mejora_id(org, *(funcion.parametro), palabras) : "N") << ")\n";
+            os << printws(nivel_ind++ * tab) << "def " << mejora_id(funcion.nombre, palabras, origen) << "(" << (funcion.parametro ? mejora_id(*(funcion.parametro), palabras, origen) : "n") << ")\n";
             for (const auto& sentencia : *funcion.cuerpo) {
-               genera(org, sentencia, os);
+               genera(sentencia, os, origen);
             }
-            os << printws(--nivel_ind * tab) << "fin\n\n";
+            os << printws(--nivel_ind * tab) << "end\n\n";
          }
       }
 
       for (const auto& sentencia : arbol.mains[0]){
-         genera(org, sentencia, os);
+         genera(sentencia, os, origen);
       }
    }
 };
