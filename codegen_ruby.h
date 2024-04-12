@@ -131,7 +131,7 @@ struct codegen_ruby : codegen_base {
             os << printws(--nivel_ind * tab) << "end\n\n";
          }
       }
-      genera(*funcion.cuerpo, os, origen);
+      genera(arbol.mains[0], os, origen);
    }
 };
 

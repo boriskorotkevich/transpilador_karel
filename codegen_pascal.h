@@ -132,7 +132,26 @@ struct codegen_pascal : codegen_base {
    }
 
    void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const std::string_view& origen) const {
+      std::vector<const declaracion_funcion*> prototipar;
+      std::set<const declaracion_funcion*> definidas;
+      for (const auto& funcion : arbol.funciones) {
+         auto iter = tabla.grafica_dependencias.find(&funcion);
+         if (iter != tabla.grafica_dependencias.end( )) {
+            definidas.insert(&funcion);
+            for (auto llamada : iter->second) {
+               if (!definidas.contains(llamada)) {
+                  prototipar.push_back(llamada);
+               }
+            }
+         }
+      }
+      std::sort(prototipar.begin( ), prototipar.end( ));
+      prototipar.erase(std::unique(prototipar.begin( ), prototipar.end( )), prototipar.end( ));
+
       os << "iniciar-programa\n";
+      for (auto decl : prototipar) {
+         //...
+      }
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
             os << printws(nivel_ind++ * tab) << "define-nueva-instruccion " << mejora_id(funcion.nombre, palabras, origen) << (funcion.parametro ? "(" + mejora_id(*(funcion.parametro), palabras, origen) + ")": "") << " como inicio\n";

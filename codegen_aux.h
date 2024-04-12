@@ -12,7 +12,7 @@ std::string printws(int ws){
 std::string mejora_id(const token_registrado& t, const std::map<tipo_token, std::string_view>& palabras, const std::string_view& origen){
    std::string cp = std::string(t.vista);
    std::replace_if(cp.begin(), cp.end(), [&](const char& c){
-      return (c == '_');
+      return (c == '_' || c == '-');
    }, 'X');
 
    if(t.tipo == IDENTIFICADOR){
