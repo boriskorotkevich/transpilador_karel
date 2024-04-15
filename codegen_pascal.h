@@ -48,29 +48,25 @@ struct codegen_pascal : codegen_base {
    }
 
    void genera(const expresion_termino* ex, std::ostream& os, const std::string_view& origen) const {
-      auto itr = palabras.find(ex->token.tipo);
       os << mejora_id(ex->token, palabras, origen);
    }
 
    void genera(const expresion_binaria* ex, std::ostream& os, const std::string_view& origen) const {
       os << "( ";
       genera(ex->izq, os, origen);
-      auto itr = palabras.find(ex->op.tipo);
-      os << " " << itr->second << " ";
+      os << " " << palabras.find(ex->op.tipo)->second << " ";
       genera(ex->der, os, origen);
       os << " )";
    }
 
    void genera(const expresion_prefija* ex, std::ostream& os, const std::string_view& origen) const {
-      auto itr = palabras.find(ex->op.tipo);
-      os << itr->second << "( ";
+      os << palabras.find(ex->op.tipo)->second << "( ";
       genera(ex->ex, os, origen);
       os << " )";
    }
 
    void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string_view& origen) const {
-      auto itr = palabras.find(ex->funcion.tipo);
-      os << itr->second << "(";
+      os << palabras.find(ex->funcion.tipo)->second << "(";
       genera(ex->parametro, os, origen);
       os << ")";
    }
@@ -150,8 +146,10 @@ struct codegen_pascal : codegen_base {
 
       os << "iniciar-programa\n";
       for (auto decl : prototipar) {
-         //...
+         os << printws(nivel_ind * tab) << "define-prototipo-instruccion " << mejora_id(decl->nombre, palabras, origen) << (decl->parametro ? "(" + mejora_id(*(decl->parametro), palabras, origen) + ")": "") << ";\n";
       }
+
+      os << "\n";
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
             os << printws(nivel_ind++ * tab) << "define-nueva-instruccion " << mejora_id(funcion.nombre, palabras, origen) << (funcion.parametro ? "(" + mejora_id(*(funcion.parametro), palabras, origen) + ")": "") << " como inicio\n";

@@ -56,29 +56,25 @@ struct codegen_java : codegen_base {
    void genera(const expresion_binaria* ex, std::ostream& os, const std::string_view& origen) const {
       os << "( ";
       genera(ex->izq, os, origen);
-      auto itr = simbolos.find(ex->op.tipo);
-      os << " " << itr->second << " ";
+      os << " " << simbolos.find(ex->op.tipo)->second << " ";
       genera(ex->der, os, origen);
       os << " )";
    }
 
    void genera(const expresion_prefija* ex, std::ostream& os, const std::string_view& origen) const {
-      auto itr = simbolos.find(ex->op.tipo);
-      os << itr->second << "( ";
+      os << simbolos.find(ex->op.tipo)->second << "( ";
       genera(ex->ex, os, origen);
       os << " )";
    }
 
    void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string_view& origen) const {
-      auto itr = palabras.find(ex->funcion.tipo);
-      os << itr->second << "(";
+      os << palabras.find(ex->funcion.tipo)->second << "(";
       genera(ex->parametro, os, origen);
       os << ")";
    }
 
    void genera(const sentencia_comando* s, std::ostream& os, const std::string_view& origen) const {
-      auto itr = palabras.find(s->comando.tipo);
-      os << printws(nivel_ind * tab) << itr->second << "();\n";
+      os << printws(nivel_ind * tab) << palabras.find(s->comando.tipo)->second << "();\n";
    }
 
    void genera(const sentencia_if* s, std::ostream& os, const std::string_view& origen) const {

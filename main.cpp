@@ -23,7 +23,7 @@
 #include <sstream>
 
 int main(int argc, char* argv[]){
-   if(argc != 4){
+   if(argc != 4 && argc != 5){
       std::cout << "Uso: " << argv[0] << " ruta_entrada version_origen version_destino [ruta_salida]\n";
       return 0;
    }
