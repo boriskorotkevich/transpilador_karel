@@ -57,9 +57,7 @@ struct codegen_base {
       virtual void genera(const sentencia_vacia*, std::ostream&, const configuracion_id&) const = 0;
 
       virtual void genera(const arbol_sintactico&, const tabla_simbolos&, std::ostream&, const configuracion_id&) const = 0;
-
-      virtual std::string ajusta_id(const std::string&) const = 0;
-      virtual void agrega_posfijo(std::string&) const = 0;
+      virtual void ajusta_id(std::string&, bool) const = 0;
 };
 
 template<typename T>
@@ -91,9 +89,10 @@ std::string codegen(const codegen_base& cb, const std::vector<token_registrado>&
    for(const token_registrado& tr : tokens){
       std::string inicial = (origen == "pascal" ? toupper_str(std::string(tr.vista)) : std::string(tr.vista));
       if (!config.traduccion.contains(inicial)) {
-         std::string convertido = cb.ajusta_id(inicial);
+         std::string convertido = inicial;
+         cb.ajusta_id(convertido, true);
          while (!ocupados.insert(convertido).second) {
-            cb.agrega_posfijo(convertido);
+            cb.ajusta_id(convertido, false);
          }
          config.traduccion[inicial] = convertido;
       }

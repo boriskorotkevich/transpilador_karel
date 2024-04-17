@@ -164,12 +164,10 @@ struct codegen_pascal : codegen_base {
       os << "finalizar-programa\n";
    }
 
-   std::string ajusta_id(const std::string& s) const {
-      return s;
-   }
-
-   void agrega_posfijo(std::string& s) const {
-      s += '_';
+   void ajusta_id(std::string& s, bool primera) const {
+      if (!primera) {
+         s += '_';
+      }
    }
 };
 

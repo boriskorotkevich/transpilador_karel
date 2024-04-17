@@ -142,17 +142,15 @@ struct codegen_java : codegen_base {
       os << "}\n";
    }
 
-   std::string ajusta_id(const std::string& s) const {
-      std::string res = s;
-      std::replace(res.begin( ), res.end( ), '-', '_');
-      if (res[0] == '_') {
-         res.erase(res.begin( ));
+   void ajusta_id(std::string& s, bool primera) const {
+      if (primera) {
+         std::replace(s.begin( ), s.end( ), '-', '_');
+         if (s[0] == '_') {
+            s.erase(s.begin( ));
+         }
+      } else {
+         s += '_';
       }
-      return res;
-   }
-
-   void agrega_posfijo(std::string& s) const {
-      s += '_';
    }
 };
 

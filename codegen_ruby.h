@@ -134,17 +134,15 @@ struct codegen_ruby : codegen_base {
       genera(arbol.mains[0], os, config);
    }
 
-   std::string ajusta_id(const std::string& s) const {
-      std::string res = s;
-      std::replace(res.begin( ), res.end( ), '-', '_');
-      if (res[0] == '_') {
-         res.erase(res.begin( ));
+   void ajusta_id(std::string& s, bool primera) const {
+      if (primera) {
+         std::replace(s.begin( ), s.end( ), '_', '-');
+         if (s[0] == '-') {
+            s.erase(s.begin( ));
+         }
+      } else {
+         s += '-';
       }
-      return res;
-   }
-
-   void agrega_posfijo(std::string& s) const {
-      s += '-';
    }
 };
 
