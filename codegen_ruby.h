@@ -46,92 +46,105 @@ struct codegen_ruby : codegen_base {
       return;
    }
 
-   void genera(const expresion_termino* ex, std::ostream& os, const std::string_view& origen) const {
-      os << mejora_id(ex->token, palabras, origen);
+   void genera(const expresion_termino* ex, std::ostream& os, const configuracion_id& config) const {
+      os << traduce(ex->token, palabras, config);
    }
 
-   void genera(const expresion_binaria* ex, std::ostream& os, const std::string_view& origen) const {
+   void genera(const expresion_binaria* ex, std::ostream& os, const configuracion_id& config) const {
       os << "( ";
-      genera(ex->izq, os, origen);
+      genera(ex->izq, os, config);
       os << " " << palabras.find(ex->op.tipo)->second << " ";
-      genera(ex->der, os, origen);
+      genera(ex->der, os, config);
       os << " )";
    }
 
-   void genera(const expresion_prefija* ex, std::ostream& os, const std::string_view& origen) const {
+   void genera(const expresion_prefija* ex, std::ostream& os, const configuracion_id& config) const {
       os << palabras.find(ex->op.tipo)->second << "( ";
-      genera(ex->ex, os, origen);
+      genera(ex->ex, os, config);
       os << " )";
    }
 
-   void genera(const expresion_llamada_nativa* ex, std::ostream& os, const std::string_view& origen) const {
+   void genera(const expresion_llamada_nativa* ex, std::ostream& os, const configuracion_id& config) const {
       os << palabras.find(ex->funcion.tipo)->second << "(";
-      genera(ex->parametro, os, origen);
+      genera(ex->parametro, os, config);
       os << ")";
    }
 
-   void genera(const sentencia_comando* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_comando* s, std::ostream& os, const configuracion_id& config) const {
       auto itr = palabras.find(s->comando.tipo);
       os << printws(nivel_ind * tab) << palabras.find(s->comando.tipo)->second << "\n";
    }
 
-   void genera(const sentencia_if* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_if* s, std::ostream& os, const configuracion_id& config) const {
       os << printws(nivel_ind++ * tab) << "si ";
-      genera(s->condicion, os, origen);
+      genera(s->condicion, os, config);
       os << "\n";
-      genera(s->parte_si, os, origen);
+      genera(s->parte_si, os, config);
       if(!s->parte_no.empty()){
          os << printws((nivel_ind - 1) * tab) << "sino\n";
-         genera(s->parte_no, os, origen);
+         genera(s->parte_no, os, config);
       }
       os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const sentencia_while* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_while* s, std::ostream& os, const configuracion_id& config) const {
       os << printws(nivel_ind++ * tab) << "mientras ";
-      genera(s->condicion, os, origen);
+      genera(s->condicion, os, config);
       os << "\n";
-      genera(s->cuerpo, os, origen);
+      genera(s->cuerpo, os, config);
       os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const sentencia_iterate* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_iterate* s, std::ostream& os, const configuracion_id& config) const {
       os << printws(nivel_ind++ * tab);
-      genera(s->condicion, os, origen);
+      genera(s->condicion, os, config);
       os << " veces\n";
-      genera(s->cuerpo, os, origen);
+      genera(s->cuerpo, os, config);
       os << printws(--nivel_ind * tab) << "end\n";
    }
 
-   void genera(const sentencia_llamada_usuario* s, std::ostream& os, const std::string_view& origen) const {
-      os << printws(nivel_ind * tab) << mejora_id(s->funcion, palabras, origen) << "(";
+   void genera(const sentencia_llamada_usuario* s, std::ostream& os, const configuracion_id& config) const {
+      os << printws(nivel_ind * tab) << traduce(s->funcion, palabras, config) << "(";
       if(s->parametro != nullptr){
-         genera(s->parametro, os, origen);
+         genera(s->parametro, os, config);
       }else{
          os << "0";
       }
       os << ")\n";
    }
 
-   void genera(const sentencia_bloque* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_bloque* s, std::ostream& os, const configuracion_id& config) const {
       if(!s->cuerpo.empty()){
-         genera(s->cuerpo, os, origen);
+         genera(s->cuerpo, os, config);
       }
    }
 
-   void genera(const sentencia_vacia* s, std::ostream& os, const std::string_view& origen) const {
+   void genera(const sentencia_vacia* s, std::ostream& os, const configuracion_id& config) const {
       os << printws(nivel_ind * tab) << ";\n";
    }
 
-   void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const std::string_view& origen) const {
+   void genera(const arbol_sintactico& arbol, const tabla_simbolos& tabla, std::ostream& os, const configuracion_id& config) const {
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
-            os << printws(nivel_ind++ * tab) << "def " << mejora_id(funcion.nombre, palabras, origen) << "(" << (funcion.parametro ? mejora_id(*(funcion.parametro), palabras, origen) : "n") << ")\n";
-            genera(*funcion.cuerpo, os, origen);
+            os << printws(nivel_ind++ * tab) << "def " << traduce(funcion.nombre, palabras, config) << "(" << (funcion.parametro ? traduce(*(funcion.parametro), palabras, config) : "n") << ")\n";
+            genera(*funcion.cuerpo, os, config);
             os << printws(--nivel_ind * tab) << "end\n\n";
          }
       }
-      genera(arbol.mains[0], os, origen);
+      genera(arbol.mains[0], os, config);
+   }
+
+   std::string ajusta_id(const std::string& s) const {
+      std::string res = s;
+      std::replace(res.begin( ), res.end( ), '-', '_');
+      if (res[0] == '_') {
+         res.erase(res.begin( ));
+      }
+      return res;
+   }
+
+   void agrega_posfijo(std::string& s) const {
+      s += '-';
    }
 };
 
