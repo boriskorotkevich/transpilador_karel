@@ -88,14 +88,17 @@ int main(int argc, char* argv[]){
 
       std::string salida;
       if(*itr_vdestino == "pascal"){
+         lexer_pascal lex_pascal;
          codegen_pascal pascal;
-         salida = codegen(pascal, tokens, arbol, tabla, *itr_vorigen);
+         salida = codegen(pascal, lex_pascal, tokens, arbol, tabla, *itr_vorigen);
       }else if(*itr_vdestino == "java"){
+         lexer_java lex_java;
          codegen_java java;
-         salida = codegen(java, tokens, arbol, tabla, *itr_vorigen);
+         salida = codegen(java, lex_java, tokens, arbol, tabla, *itr_vorigen);
       }else{
+         lexer_pascal lex_ruby;
          codegen_ruby ruby;
-         salida = codegen(ruby, tokens, arbol, tabla, *itr_vorigen);
+         salida = codegen(ruby, lex_ruby, tokens, arbol, tabla, *itr_vorigen);
       }
 
       if (argc > 4) {

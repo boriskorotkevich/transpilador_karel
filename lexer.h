@@ -32,11 +32,6 @@ enum tipo_token{
    COMO,             // pascal
    DEF,              // ruby
 
-   // tokens relacionados con terminar una función
-
-   RETURN,           // java
-   SAL_INS,          // pascal y ruby
-
    // tokens relacionados con delimitadores de instrucción
 
    PUNTO_COMA,       // java
@@ -71,6 +66,7 @@ enum tipo_token{
 
    // tokens relacionados con expresiones, comandos y fin de archivo (comunes para todos)
 
+   RETURN,
    APAGATE,
    AVANZA,
    GIRA_IZQ,
@@ -111,9 +107,21 @@ class lexer_base {
    std::map<std::string_view, tipo_token> palabras, simbolos;
    int max_tam_simbolo;
 
+   template<typename Clave, typename Valor>
+   std::map<Valor, Clave> genera_inverso(const std::map<Clave, Valor>& mp){
+      std::map<Valor, Clave> ans;
+      for(const auto& [c, v] : mp){
+         ans[v] = c;
+      }
+      return ans;
+   }
+
 public:
+   std::map<tipo_token, std::string_view> inverso_palabras, inverso_simbolos;
    lexer_base(std::map<std::string_view, tipo_token>&& p, std::map<std::string_view, tipo_token>&& s)
    : palabras(std::move(p)), simbolos(std::move(s)), max_tam_simbolo(0) {
+      inverso_palabras = std::move(genera_inverso(palabras));
+      inverso_simbolos = std::move(genera_inverso(simbolos));
       for (const auto& [cad, token] : simbolos) {
          max_tam_simbolo = std::max(max_tam_simbolo, int(cad.size( )));
       }

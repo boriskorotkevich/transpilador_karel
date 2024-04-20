@@ -11,6 +11,8 @@
 
 struct configuracion_id {
    std::string_view origen;
+   std::map<tipo_token, std::string_view> palabras;
+   std::map<tipo_token, std::string_view> simbolos;
    std::map<std::string, std::string> traduccion;
 };
 
@@ -19,14 +21,8 @@ struct codegen_base {
       int tab;
 
    public:
-      const std::map<tipo_token, std::string_view> palabras, simbolos;
-
-      codegen_base(int t, std::map<tipo_token, std::string_view>&& p, std::map<tipo_token, std::string_view>&& s)
-      : tab(t), palabras(std::move(p)), simbolos(std::move(s)){
-      }
-
-      codegen_base(int t, std::map<tipo_token, std::string_view>&& p)
-      : tab(t), palabras(std::move(p)){
+      codegen_base(int t)
+      : tab(t){
       }
 
       void genera(const std::vector<std::unique_ptr<sentencia>>& vs, std::ostream& os, const configuracion_id& config) const {
@@ -65,7 +61,7 @@ void genera(const T* p, const codegen_base& cb, std::ostream& os, const configur
    cb.genera(p, os, config);
 }
 
-std::string traduce(const token_registrado& t, const std::map<tipo_token, std::string_view>& palabras, const configuracion_id& config){
+std::string traduce(const token_registrado& t, const configuracion_id& config){
    if(t.tipo == IDENTIFICADOR){
       if (config.origen == "pascal") {
          return config.traduccion.find(toupper_str(t.vista))->second;
@@ -75,17 +71,17 @@ std::string traduce(const token_registrado& t, const std::map<tipo_token, std::s
    }else if(t.tipo == LITERAL_ENTERA){
       return std::string(t.vista);
    }else{
-      return std::string{palabras.find(t.tipo)->second};
+      return std::string{config.palabras.find(t.tipo)->second};
    }
 }
 
-std::string codegen(const codegen_base& cb, const std::vector<token_registrado>& tokens, const arbol_sintactico& arbol, const tabla_simbolos& tabla, const std::string_view& origen) {
+std::string codegen(const codegen_base& cb, const lexer_base& lb, const std::vector<token_registrado>& tokens, const arbol_sintactico& arbol, const tabla_simbolos& tabla, const std::string_view& origen) {
    std::set<std::string> ocupados;
-   for(const auto [t, sv] : cb.palabras) {
+   for(const auto [t, sv] : lb.inverso_palabras) {
       ocupados.insert(std::string(sv));
    }
 
-   configuracion_id config = { origen };
+   configuracion_id config = { origen, lb.inverso_palabras, lb.inverso_simbolos };
    for(const token_registrado& tr : tokens){
       std::string inicial = (origen == "pascal" ? toupper_str(std::string(tr.vista)) : std::string(tr.vista));
       if (!config.traduccion.contains(inicial)) {

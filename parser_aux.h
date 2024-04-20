@@ -49,7 +49,7 @@ bool es_decl_funcion_ruby(tipo_token t){
 }
 
 bool es_comando(tipo_token t) {
-   return t == AVANZA || t == APAGATE ||  t == GIRA_IZQ || t == COGE_ZUM || t == DEJA_ZUM || t == RETURN || t == SAL_INS;
+   return t == AVANZA || t == APAGATE ||  t == GIRA_IZQ || t == COGE_ZUM || t == DEJA_ZUM || t == RETURN;
 }
 
 bool es_operador_prefijo(tipo_token t) {

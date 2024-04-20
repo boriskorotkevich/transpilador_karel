@@ -14,7 +14,7 @@ struct lexer_ruby : lexer_base{
    {
       {"def", DEF},
       {"apagate", APAGATE},
-      {"sal-de-instruccion", SAL_INS},
+      {"sal-de-instruccion", RETURN},
       {"gira-izquierda", GIRA_IZQ},
       {"avanza", AVANZA},
       {"coge-zumbador", COGE_ZUM},
@@ -28,7 +28,7 @@ struct lexer_ruby : lexer_base{
       {"frente-libre", FRENTE_LIB},
       {"frente-bloqueado", FRENTE_BLOQ},
       {"izquierda-libre", IZQUIERDA_LIB},
-      {"izquierda-bloqueda", IZQUIERDA_BLOQ},
+      {"izquierda-bloqueada", IZQUIERDA_BLOQ},
       {"derecha-libre", DERECHA_LIB},
       {"derecha-bloqueada", DERECHA_BLOQ},
       {"junto-a-zumbador", JUNTO_ZUM},

@@ -8,73 +8,36 @@ struct codegen_java : codegen_base {
    mutable int nivel_ind = 1;
 
    codegen_java()
-   : codegen_base(
-      3,
-   {
-      {RETURN, "return"},
-      {SAL_INS, "return"},
-      {APAGATE, "turnoff"},
-      {GIRA_IZQ, "turnleft"},
-      {AVANZA, "move"},
-      {COGE_ZUM, "pickbeeper"},
-      {DEJA_ZUM, "putbeeper"},
-      {PRECEDE, "pred"},
-      {SUCEDE, "succ"},
-      {ES_CERO, "iszero"},
-      {FRENTE_LIB, "frontIsClear"},
-      {FRENTE_BLOQ, "frontIsBlocked"},
-      {IZQUIERDA_LIB, "leftIsClear"},
-      {IZQUIERDA_BLOQ, "leftIsBlocked"},
-      {DERECHA_LIB, "rightIsClear"},
-      {DERECHA_BLOQ, "rightIsBlocked"},
-      {JUNTO_ZUM, "nextToABeeper"},
-      {NJUNTO_ZUM, "notNextToABeeper"},
-      {ALGUN_ZUM_BAG, "anyBeepersInBeeperBag"},
-      {NINGUN_ZUM_BAG, "noBeepersInBeeperBag"},
-      {ORIENTADO_NORTE, "facingNorth"},
-      {ORIENTADO_SUR, "facingSouth"},
-      {ORIENTADO_ESTE, "facingEast"},
-      {ORIENTADO_OESTE, "facingWest"},
-      {NORIENTADO_NORTE, "notFacingNorth"},
-      {NORIENTADO_SUR, "notFacingSouth"},
-      {NORIENTADO_ESTE, "notFacingEast"},
-      {NORIENTADO_OESTE, "notFacingWest"}
-   },
-   /* simbolos */
-   {
-      {NOT, "!"},
-      {OR, "||"},
-      {AND, "&&"}
-   }) {
+   : codegen_base(3) {
       return;
    }
 
    void genera(const expresion_termino* ex, std::ostream& os, const configuracion_id& config) const {
-      os << traduce(ex->token, palabras, config);
+      os << traduce(ex->token, config);
    }
 
    void genera(const expresion_binaria* ex, std::ostream& os, const configuracion_id& config) const {
       os << "( ";
       genera(ex->izq, os, config);
-      os << " " << simbolos.find(ex->op.tipo)->second << " ";
+      os << " " << config.simbolos.find(ex->op.tipo)->second << " ";
       genera(ex->der, os, config);
       os << " )";
    }
 
    void genera(const expresion_prefija* ex, std::ostream& os, const configuracion_id& config) const {
-      os << simbolos.find(ex->op.tipo)->second << "( ";
+      os << config.simbolos.find(ex->op.tipo)->second << "( ";
       genera(ex->ex, os, config);
       os << " )";
    }
 
    void genera(const expresion_llamada_nativa* ex, std::ostream& os, const configuracion_id& config) const {
-      os << palabras.find(ex->funcion.tipo)->second << "(";
+      os << config.palabras.find(ex->funcion.tipo)->second << "(";
       genera(ex->parametro, os, config);
       os << ")";
    }
 
    void genera(const sentencia_comando* s, std::ostream& os, const configuracion_id& config) const {
-      os << printws(nivel_ind * tab) << palabras.find(s->comando.tipo)->second << "();\n";
+      os << printws(nivel_ind * tab) << config.palabras.find(s->comando.tipo)->second << "();\n";
    }
 
    void genera(const sentencia_if* s, std::ostream& os, const configuracion_id& config) const {
@@ -109,7 +72,7 @@ struct codegen_java : codegen_base {
    }
 
    void genera(const sentencia_llamada_usuario* s, std::ostream& os, const configuracion_id& config) const {
-      os << printws(nivel_ind * tab) << traduce(s->funcion, palabras, config) << "(";
+      os << printws(nivel_ind * tab) << traduce(s->funcion, config) << "(";
       if(s->parametro != nullptr){
          genera(s->parametro, os, config);
       }
@@ -130,7 +93,7 @@ struct codegen_java : codegen_base {
       os << "class program {\n";
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
-            os << printws(nivel_ind++ * tab) << "void " << traduce(funcion.nombre, palabras, config) << "(" << (funcion.parametro ? traduce(*(funcion.parametro), palabras, config) : "") << "){\n";
+            os << printws(nivel_ind++ * tab) << "void " << traduce(funcion.nombre, config) << "(" << (funcion.parametro ? traduce(*(funcion.parametro), config) : "") << "){\n";
             genera(*funcion.cuerpo, os, config);
             os << printws(--nivel_ind * tab) << "}\n\n";
          }
