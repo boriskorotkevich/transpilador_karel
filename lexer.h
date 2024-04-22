@@ -104,24 +104,24 @@ enum tipo_token{
 };
 
 class lexer_base {
-   std::map<std::string_view, tipo_token> palabras, simbolos;
    int max_tam_simbolo;
 
-   template<typename Clave, typename Valor>
-   std::map<Valor, Clave> genera_inverso(const std::map<Clave, Valor>& mp){
-      std::map<Valor, Clave> ans;
-      for(const auto& [c, v] : mp){
-         ans[v] = c;
+   template<typename K, typename V>
+   std::map<V, K> genera_inverso(const std::map<K, V>& mapa){
+      std::map<V, K> ans;
+      for(const auto& [k, v] : mapa){
+         ans[v] = k;
       }
       return ans;
    }
 
 public:
-   std::map<tipo_token, std::string_view> inverso_palabras, inverso_simbolos;
+   const std::map<std::string_view, tipo_token> palabras, simbolos;
+   const std::map<tipo_token, std::string_view> inverso_palabras, inverso_simbolos;
+
    lexer_base(std::map<std::string_view, tipo_token>&& p, std::map<std::string_view, tipo_token>&& s)
-   : palabras(std::move(p)), simbolos(std::move(s)), max_tam_simbolo(0) {
-      inverso_palabras = std::move(genera_inverso(palabras));
-      inverso_simbolos = std::move(genera_inverso(simbolos));
+   : max_tam_simbolo(0), palabras(std::move(p)), simbolos(std::move(s)),
+     inverso_palabras(genera_inverso(palabras)), inverso_simbolos(genera_inverso(simbolos)) {
       for (const auto& [cad, token] : simbolos) {
          max_tam_simbolo = std::max(max_tam_simbolo, int(cad.size( )));
       }

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <script src="main.js"></script>
+   </head>
+   <body onload="inicializa( )">
+      Entrada: <textarea id="entrada"></textarea><br>
+      Salida: <textarea id="salida"></textarea><br>
+      <button type="button" id="boton" disabled>Traducir</button>
+      <script>
+         async function inicializa( ) {
+            let wasm = await cargador_wasm( );
+            let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
+            
+            let boton = document.getElementById("boton");
+            boton.disabled = false;
+            boton.onclick = function( ) {
+               document.getElementById("salida").value = traduce(
+                  document.getElementById("entrada").value, 
+                  "java", 
+                  "pascal"
+               );
+            };
+         }
+      </script>
+   </body>
+</html>

@@ -1,0 +1,12 @@
+https://emscripten.org/docs/getting_started/downloads.html
+
+// ejecutar cmd con permisos de administrador
+cd C:\
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+git pull
+emsdk install latest
+emsdk activate latest --permanent
+
+cd CARPETA_DE_TU_PROYECTO
+em++ -O3 -fexceptions -std=c++23 main.cpp -s EXPORTED_RUNTIME_METHODS=['cwrap'] -s MODULARIZE=1 -s EXPORT_NAME="cargador_wasm" -o main.js

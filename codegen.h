@@ -11,8 +11,8 @@
 
 struct configuracion_id {
    std::string_view origen;
-   std::map<tipo_token, std::string_view> palabras;
-   std::map<tipo_token, std::string_view> simbolos;
+   const std::map<tipo_token, std::string_view>& palabras;
+   const std::map<tipo_token, std::string_view>& simbolos;
    std::map<std::string, std::string> traduccion;
 };
 
