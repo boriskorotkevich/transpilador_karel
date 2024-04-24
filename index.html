@@ -3,26 +3,97 @@
    <head>
       <meta charset="utf-8">
       <script src="main.js"></script>
+      <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+      <script src="codemirror/lib/codemirror.js"></script>
+
+<style>
+
+html {
+   margin: 0px;
+   padding: 2px;
+}
+
+body {
+   margin: 0px;
+   padding: 0px;
+}
+
+#columnas {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   border: 1px solid black;
+
+}
+
+.CodeMirror {
+   min-height: calc(60vh - 5px);
+   max-height: calc(97.5vh - 5px);
+   border: 1px solid #CCCCCC;
+   overflow-x: hidden;
+}
+
+#error {
+   width: 100%;
+   max-width: 100%;
+   height: 100px;
+}
+
+</style>
    </head>
    <body onload="inicializa( )">
-      Entrada: <textarea id="entrada"></textarea><br>
-      Salida: <textarea id="salida"></textarea><br>
-      <button type="button" id="boton" disabled>Traducir</button>
-      <script>
-         async function inicializa( ) {
-            let wasm = await cargador_wasm( );
-            let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
-            
-            let boton = document.getElementById("boton");
-            boton.disabled = false;
-            boton.onclick = function( ) {
-               document.getElementById("salida").value = traduce(
-                  document.getElementById("entrada").value, 
-                  "java", 
-                  "pascal"
-               );
-            };
-         }
+      <div id="columnas">
+         <div>
+            Entrada:
+            <select id="vorigen">
+               <option value="java">java</option>
+               <option value="pascal">pascal</option>
+               <option value="ruby">ruby</option>
+            </select>
+            <textarea id="entrada"></textarea>
+            Error:<br> <textarea id="error"></textarea>
+            <button type="button" id="boton" disabled>Traducir</button>
+         </div>
+         <div>
+            Salida: 
+            <select id="vdestino">
+               <option value="java">java</option>
+               <option value="pascal">pascal</option>
+               <option value="ruby">ruby</option>
+            </select>
+            <textarea id="salida"></textarea>
+         </div>
+      </div>
+       <script>
+          var edit_vorigen = CodeMirror.fromTextArea(entrada, {
+             lineNumbers: true
+          });
+
+          var edit_vdestino = CodeMirror.fromTextArea(salida, {
+             lineNumbers: true
+          });
+
+          async function inicializa( ) {
+             let wasm = await cargador_wasm( );
+             let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
+
+             let boton = document.getElementById("boton");
+             boton.disabled = false;
+             boton.onclick = function( ) {
+                document.getElementById("error").value = ""
+                let contenido = traduce(
+                   edit_vorigen.getValue(),
+                   document.getElementById("vorigen").value,
+                   document.getElementById("vdestino").value
+                );
+
+                if (contenido.indexOf("---> ERROR") !== -1){
+                   document.getElementById("error").value = contenido;
+                }else{
+                   edit_vdestino.setValue(contenido);
+                }
+
+             };
+          }
       </script>
    </body>
 </html>
