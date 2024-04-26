@@ -74,6 +74,7 @@ body {
             let wasm = await cargador_wasm( );
             let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
             let cambio_detectado = function( ) {
+               document.getElementById("error").value = "";
                let entrada = edit_vorigen.getValue().trim();
                if (entrada != "") {
                   let contenido = traduce(
@@ -86,8 +87,6 @@ body {
                   }else{
                      edit_vdestino.setValue(contenido);
                   }
-               } else {
-                  document.getElementById("error").value = "";
                }
             }
 
