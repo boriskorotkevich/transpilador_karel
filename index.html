@@ -45,55 +45,57 @@ body {
          <div>
             Entrada:
             <select id="vorigen">
-               <option value="java">java</option>
-               <option value="pascal">pascal</option>
-               <option value="ruby">ruby</option>
+               <option value="java">Java</option>
+               <option value="pascal">Pascal</option>
+               <option value="ruby">Ruby</option>
             </select>
-            <textarea id="entrada"></textarea>
-            Error:<br> <textarea id="error"></textarea>
-            <button type="button" id="boton" disabled>Traducir</button>
+            <textarea id="entrada" disabled></textarea>
+            Error:<br> <textarea id="error" readonly>Espere a que cargue el transpilador...</textarea>
          </div>
          <div>
             Salida: 
             <select id="vdestino">
-               <option value="java">java</option>
-               <option value="pascal">pascal</option>
-               <option value="ruby">ruby</option>
+               <option value="java">Java</option>
+               <option value="pascal">Pascal</option>
+               <option value="ruby">Ruby</option>
             </select>
-            <textarea id="salida"></textarea>
+            <textarea id="salida" readonly></textarea>
          </div>
       </div>
-       <script>
-          var edit_vorigen = CodeMirror.fromTextArea(entrada, {
-             lineNumbers: true
-          });
+      <script>
+         let edit_vorigen = CodeMirror.fromTextArea(entrada, {
+            lineNumbers: true, readOnly: true
+         });
+         let edit_vdestino = CodeMirror.fromTextArea(salida, {
+            lineNumbers: true, readOnly: true
+         });
 
-          var edit_vdestino = CodeMirror.fromTextArea(salida, {
-             lineNumbers: true
-          });
+         async function inicializa( ) {
+            let wasm = await cargador_wasm( );
+            let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
+            let cambio_detectado = function( ) {
+               let entrada = edit_vorigen.getValue().trim();
+               if (entrada != "") {
+                  let contenido = traduce(
+                     edit_vorigen.getValue(),
+                     document.getElementById("vorigen").value,
+                     document.getElementById("vdestino").value
+                  );
+                  if (contenido.indexOf("---> ERROR") !== -1){
+                     document.getElementById("error").value = contenido;
+                  }else{
+                     edit_vdestino.setValue(contenido);
+                  }
+               } else {
+                  document.getElementById("error").value = "";
+               }
+            }
 
-          async function inicializa( ) {
-             let wasm = await cargador_wasm( );
-             let traduce = wasm.cwrap("traduce", "string", [ "string", "string", "string" ]);
-
-             let boton = document.getElementById("boton");
-             boton.disabled = false;
-             boton.onclick = function( ) {
-                document.getElementById("error").value = ""
-                let contenido = traduce(
-                   edit_vorigen.getValue(),
-                   document.getElementById("vorigen").value,
-                   document.getElementById("vdestino").value
-                );
-
-                if (contenido.indexOf("---> ERROR") !== -1){
-                   document.getElementById("error").value = contenido;
-                }else{
-                   edit_vdestino.setValue(contenido);
-                }
-
-             };
-          }
+            edit_vorigen.setOption("readOnly", false);
+            edit_vorigen.on("change", cambio_detectado);
+            document.getElementById("vdestino").onchange = cambio_detectado;
+            document.getElementById("error").value = "";
+         }
       </script>
    </body>
 </html>
