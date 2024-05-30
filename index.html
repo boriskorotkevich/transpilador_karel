@@ -49,7 +49,14 @@ body {
                <option value="pascal">Pascal</option>
                <option value="ruby">Ruby</option>
             </select>
-            <textarea id="entrada" disabled></textarea>
+            <textarea id="entrada" disabled>
+class program {
+   program() {
+      move();
+      turnoff();
+   }
+}
+</textarea>
             Error:<br> <textarea id="error" readonly>Espere a que cargue el transpilador...</textarea>
          </div>
          <div>
@@ -92,8 +99,10 @@ body {
 
             edit_vorigen.setOption("readOnly", false);
             edit_vorigen.on("change", cambio_detectado);
+            document.getElementById("vorigen").onchange = cambio_detectado;
             document.getElementById("vdestino").onchange = cambio_detectado;
             document.getElementById("error").value = "";
+            cambio_detectado( );
          }
       </script>
    </body>

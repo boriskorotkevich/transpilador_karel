@@ -113,8 +113,9 @@ struct codegen_pascal : codegen_base {
       for (auto decl : prototipar) {
          os << printws(nivel_ind * tab) << "define-prototipo-instruccion " << traduce(decl->nombre, config) << (decl->parametro ? "(" + traduce(*(decl->parametro), config) + ")": "") << ";\n";
       }
-
-      os << "\n";
+      if (!prototipar.empty( )) {
+         os << "\n";
+      }
       for (const auto& funcion : arbol.funciones) {
          if(funcion.cuerpo != nullptr){
             os << printws(nivel_ind++ * tab) << "define-nueva-instruccion " << traduce(funcion.nombre, config) << (funcion.parametro ? "(" + traduce(*(funcion.parametro), config) + ")": "") << " como inicio\n";

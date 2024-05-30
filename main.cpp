@@ -33,7 +33,9 @@
 #endif
 const char* traduce(const char* entrada_cstr, const char* vorigen_cstr, const char* vdestino_cstr) {
    std::string entrada(entrada_cstr);
-   entrada += '\n';
+   if (entrada.empty( ) || entrada.back( ) != '\n') {
+      entrada += '\n';
+   }
 
    try{
       std::string_view vorigen(vorigen_cstr), vdestino(vdestino_cstr);
